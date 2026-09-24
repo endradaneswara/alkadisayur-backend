@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pembayaran', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pesanan_id')->constrained('pesanan')->onDelete('cascade');
+            $table->foreignId('pesanan_id')->unique()->constrained('pesanan')->onDelete('cascade');
             $table->enum('metode_pembayaran', ['QRIS', 'Transfer', 'COD'])->default('QRIS');
             $table->enum('status', ['pending', 'berhasil', 'gagal', 'expired'])->default('pending');
             $table->decimal('jumlah', 12, 2);

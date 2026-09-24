@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\User;
 
 class Notifikasi extends Model
 {
@@ -15,6 +14,7 @@ class Notifikasi extends Model
 
     protected $fillable = [
         'user_id',
+        'pesanan_id',
         'judul',
         'pesan',
         'dibaca_pada',
@@ -29,5 +29,10 @@ class Notifikasi extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function pesanan(): BelongsTo
+    {
+        return $this->belongsTo(Pesanan::class);
     }
 }

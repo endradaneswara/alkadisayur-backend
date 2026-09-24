@@ -18,7 +18,16 @@ class KategoriFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nama_kategori' => fake()->randomElement([
+                'sayuran',
+                'buah',
+                'bumbu_dapur',
+                'bahan_pokok',
+                'hewani',
+                'makanan_minuman',
+                'frozen_food',
+                'lainnya',
+            ]),
         ];
     }
 }

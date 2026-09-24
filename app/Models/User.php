@@ -15,7 +15,7 @@ use App\Models\Notifikasi;
 
 /**
  * @property int $id
- * @property string $nama
+ * @property string $name
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string $password
@@ -28,7 +28,7 @@ use App\Models\Notifikasi;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['nama', 'email', 'password', 'no_hp'])]
+#[Fillable(['name', 'email', 'password', 'no_hp'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {

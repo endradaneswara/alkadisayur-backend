@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('notifikasi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('pesanan_id')->constrained('pesanan')->onDelete('cascade');
             $table->string('judul', 150);
             $table->text('pesan');
             $table->timestamp('dibaca_pada')->nullable();
