@@ -25,8 +25,8 @@ return new class extends Migration
             $table->decimal('HargaBeli', 12, 2);
             $table->decimal('HargaJual', 12, 2);
             $table->text('Keterangan')->nullable();
-            $table->string('foto')->nullable();
-            $table->enum('status', ['tersedia', 'tidak tersedia'])->default('tersedia');
+            $table->string('Foto')->nullable();
+            $table->enum('Status', ['tersedia', 'tidak tersedia'])->default('tersedia');
             $table->timestamps();
         });
     }

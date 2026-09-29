@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Barang extends Model
 {
@@ -24,8 +25,8 @@ class Barang extends Model
         'HargaBeli',
         'HargaJual',
         'Keterangan',
-        'foto',
-        'status',
+        'Foto',
+        'Status',
     ];
 
     protected function casts(): array
@@ -36,5 +37,10 @@ class Barang extends Model
             'HargaBeli' => 'decimal:2',
             'HargaJual' => 'decimal:2',
         ];
+    }
+
+    public function kategori(): BelongsTo
+    {
+        return $this->belongsTo(Kategori::class, 'kategori_id');
     }
 }

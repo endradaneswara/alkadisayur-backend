@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use App\Models\Ulasan;
 use App\Models\Notifikasi;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property int $id
@@ -28,12 +29,12 @@ use App\Models\Notifikasi;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'no_hp'])]
+#[Fillable(['name', 'email', 'password', 'google_id', 'avatar','no_hp'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -58,17 +59,11 @@ class User extends Authenticatable
         return $this->hasMany(Alamat::class);
     }
 
-    /**
-     * Relasi: user memiliki satu ulasan (migration membuat unique user_id di tabel ulasan)
-     */
     public function ulasan()
     {
         return $this->hasOne(Ulasan::class);
     }
 
-    /**
-     * Relasi: user memiliki banyak notifikasi
-     */
     public function notifikasi()
     {
         return $this->hasMany(Notifikasi::class);

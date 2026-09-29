@@ -31,8 +31,8 @@ class BarangFactory extends Factory
             'HargaBeli' => fake()->randomFloat(2, 1000, 1000000),
             'HargaJual' => fake()->randomFloat(2, 1000, 1500000),
             'Keterangan' => fake()->sentence(),
-            'foto' => fake()->imageUrl(),
-            'status' => fake()->randomElement([
+            'Foto' => fake()->imageUrl(),
+            'Status' => fake()->randomElement([
                 'tersedia',
                 'tidak tersedia',
             ]),
