@@ -38,25 +38,16 @@ class Pesanan extends Model
         ];
     }
 
-    /**
-     * Get the user who placed this order.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the delivery address for this order.
-     */
     public function alamat(): BelongsTo
     {
         return $this->belongsTo(Alamat::class);
     }
 
-    /**
-     * Get the payments for this order.
-     */
     public function pembayaran(): HasOne
     {
         return $this->hasOne(Pembayaran::class);

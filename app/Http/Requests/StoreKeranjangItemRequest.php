@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UpdateKategoriRequest extends FormRequest
+class StoreKeranjangItemRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,10 +13,9 @@ class UpdateKategoriRequest extends FormRequest
 
     public function rules(): array
     {
-        $kategoriId = $this->route('kategori');
-
         return [
-            'nama_kategori' => ['sometimes', 'required', 'string', 'max:100'],
+            'barang_id' => ['required', 'integer', 'exists:barang,id'],
+            'jumlah' => ['required', 'integer', 'min:1'],
         ];
     }
 }

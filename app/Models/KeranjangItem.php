@@ -29,17 +29,11 @@ class KeranjangItem extends Model
         ];
     }
 
-    /**
-     * Get the cart that owns this item.
-     */
     public function keranjang(): BelongsTo
     {
         return $this->belongsTo(Keranjang::class);
     }
 
-    /**
-     * Get the item product.
-     */
     public function barang(): BelongsTo
     {
         return $this->belongsTo(Barang::class);

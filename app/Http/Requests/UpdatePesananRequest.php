@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UpdateKategoriRequest extends FormRequest
+class UpdatePesananRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,10 +13,8 @@ class UpdateKategoriRequest extends FormRequest
 
     public function rules(): array
     {
-        $kategoriId = $this->route('kategori');
-
         return [
-            'nama_kategori' => ['sometimes', 'required', 'string', 'max:100'],
+            'status' => ['required', 'in:pending,diproses,dikirim,selesai,dibatalkan'],
         ];
     }
 }

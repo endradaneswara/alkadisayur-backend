@@ -32,17 +32,11 @@ class PesananItem extends Model
         ];
     }
 
-    /**
-     * Get the order that owns this item.
-     */
     public function pesanan(): BelongsTo
     {
         return $this->belongsTo(Pesanan::class);
     }
 
-    /**
-     * Get the product for this item.
-     */
     public function barang(): BelongsTo
     {
         return $this->belongsTo(Barang::class);
