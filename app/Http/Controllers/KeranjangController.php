@@ -17,7 +17,6 @@ class KeranjangController extends Controller
         protected KeranjangService $keranjangService
     ) {}
 
-
     public function index(Request $request)
     {
         $keranjang = $this->keranjangService->index(

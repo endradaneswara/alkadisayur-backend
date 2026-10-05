@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Barang;
 use App\Models\Keranjang;
 use App\Models\Pesanan;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 
 class PesananService
 {
+
     public function index(string|int $userId): Collection
     {
         return Pesanan::with([
@@ -55,7 +56,18 @@ class PesananService
                 ]);
             }
 
-            if ($data['metode'] === 'pesan antar' && empty($data['alamat_id'])) {
+            if (empty($data['lokasi_toko_id'])) {
+                throw ValidationException::withMessages([
+                    'lokasi_toko_id' => [
+                        'Lokasi toko wajib dipilih.'
+                    ],
+                ]);
+            }
+
+            if (
+                $data['metode'] === 'pesan antar'
+                && empty($data['alamat_id'])
+            ) {
                 throw ValidationException::withMessages([
                     'alamat_id' => [
                         'Alamat wajib dipilih untuk metode pesan antar.'
@@ -63,15 +75,15 @@ class PesananService
                 ]);
             }
 
-            if ($data['metode'] === 'ambil di toko' && empty($data['lokasi_toko_id'])) {
-                throw ValidationException::withMessages([
-                    'lokasi_toko_id' => [
-                        'Lokasi toko wajib dipilih untuk metode ambil di toko.'
-                    ],
-                ]);
-            }
-
             foreach ($keranjang->items as $item) {
+
+                if ($item->barang->status !== 'tersedia') {
+                    throw ValidationException::withMessages([
+                        'barang' => [
+                            "Barang {$item->barang->NamaItem} sudah tidak tersedia."
+                        ],
+                    ]);
+                }
 
                 if ($item->barang->Stok < $item->jumlah) {
                     throw ValidationException::withMessages([
@@ -83,7 +95,8 @@ class PesananService
             }
 
             $totalHarga = $keranjang->items->sum(
-                fn ($item) => $item->jumlah * $item->barang->HargaJual
+                fn ($item) =>
+                    $item->jumlah * $item->barang->HargaJual
             );
 
             $biayaPengiriman = $data['metode'] === 'pesan antar'
@@ -92,13 +105,12 @@ class PesananService
 
             $pesanan = Pesanan::create([
                 'user_id' => $userId,
+
                 'alamat_id' => $data['metode'] === 'pesan antar'
                     ? $data['alamat_id']
                     : null,
 
-                'lokasi_toko_id' => $data['metode'] === 'ambil di toko'
-                    ? $data['lokasi_toko_id']
-                    : null,
+                'lokasi_toko_id' => $data['lokasi_toko_id'],
 
                 'nomor_order' => 'ORD-' . strtoupper(
                     Str::random(10)
@@ -106,9 +118,12 @@ class PesananService
 
                 'total_harga' => $totalHarga,
                 'biaya_pengiriman' => $biayaPengiriman,
+
                 'metode' => $data['metode'],
                 'status' => 'pending',
+
                 'catatan' => $data['catatan'] ?? null,
+
                 'tanggal_pemesanan' => now(),
             ]);
 
@@ -140,35 +155,18 @@ class PesananService
         });
     }
 
-    public function update(
-        string|int $id,
-        array $data
-    ): Pesanan {
-        $pesanan = Pesanan::findOrFail($id);
-
-        $pesanan->update($data);
-
-        return $pesanan->fresh([
-            'alamat',
-            'lokasiToko',
-            'items.barang',
-            'pembayaran',
-        ]);
-    }
-
     public function cancel(
         string|int $userId,
         string|int $id
     ): Pesanan {
-        $pesanan = Pesanan::where('user_id', $userId)
+        $pesanan = Pesanan::with('items.barang')
+            ->where('user_id', $userId)
             ->findOrFail($id);
 
-        if (
-            in_array($pesanan->status, [
-                'selesai',
-                'dibatalkan',
-            ])
-        ) {
+        if (!in_array($pesanan->status, [
+            'pending',
+            'diproses',
+        ])) {
             throw ValidationException::withMessages([
                 'status' => [
                     'Pesanan tidak dapat dibatalkan.'
@@ -176,21 +174,169 @@ class PesananService
             ]);
         }
 
-        $pesanan->update([
-            'status' => 'dibatalkan',
-        ]);
+        DB::transaction(function () use ($pesanan) {
 
-        foreach ($pesanan->items as $item) {
-            $item->barang->increment(
-                'Stok',
-                $item->jumlah
-            );
-        }
+            $pesanan->update([
+                'status' => 'dibatalkan',
+            ]);
+
+            foreach ($pesanan->items as $item) {
+                $item->barang->increment(
+                    'Stok',
+                    $item->jumlah
+                );
+            }
+        });
 
         return $pesanan->fresh([
             'items.barang',
             'alamat',
             'lokasiToko',
+            'pembayaran',
         ]);
+    }
+
+    public function adminIndex(User $user): Collection
+    {
+        $query = Pesanan::with([
+            'user',
+            'alamat',
+            'lokasiToko',
+            'items.barang',
+            'pembayaran',
+        ])
+            ->latest('tanggal_pemesanan');
+
+        if ($user->role === 'admin') {
+            $query->where(
+                'lokasi_toko_id',
+                $user->lokasi_id
+            );
+        }
+
+        return $query->get();
+    }
+
+    public function adminShow(
+        User $user,
+        string|int $id
+    ): Pesanan {
+        $query = Pesanan::with([
+            'user',
+            'alamat',
+            'lokasiToko',
+            'items.barang',
+            'pembayaran',
+        ]);
+
+        if ($user->role === 'admin') {
+            $query->where(
+                'lokasi_toko_id',
+                $user->lokasi_id
+            );
+        }
+
+        return $query->findOrFail($id);
+    }
+
+    public function updateStatus(
+        User $user,
+        string|int $id,
+        array $data
+    ): Pesanan {
+        $query = Pesanan::query();
+
+        if ($user->role === 'admin') {
+            $query->where(
+                'lokasi_toko_id',
+                $user->lokasi_id
+            );
+        }
+
+        $pesanan = $query->findOrFail($id);
+
+        $statusBaru = $data['status'];
+
+        $statusValid = [
+            'pending',
+            'diproses',
+            'dikirim',
+            'selesai',
+            'dibatalkan',
+        ];
+
+        if (!in_array($statusBaru, $statusValid)) {
+            throw ValidationException::withMessages([
+                'status' => [
+                    'Status pesanan tidak valid.'
+                ],
+            ]);
+        }
+
+        if (in_array($pesanan->status, [
+            'selesai',
+            'dibatalkan',
+        ])) {
+            throw ValidationException::withMessages([
+                'status' => [
+                    'Status pesanan sudah final dan tidak dapat diubah.'
+                ],
+            ]);
+        }
+
+        $statusBerikutnya = [
+            'pending' => [
+                'diproses',
+                'dibatalkan',
+            ],
+            'diproses' => [
+                'dikirim',
+                'dibatalkan',
+            ],
+            'dikirim' => [
+                'selesai',
+            ],
+        ];
+
+        if (!in_array(
+            $statusBaru,
+            $statusBerikutnya[$pesanan->status] ?? []
+        )) {
+            throw ValidationException::withMessages([
+                'status' => [
+                    'Perubahan status pesanan tidak valid.'
+                ],
+            ]);
+        }
+
+        return DB::transaction(function () use (
+            $pesanan,
+            $statusBaru
+        ) {
+
+            if ($statusBaru === 'dibatalkan') {
+
+                $pesanan->load('items.barang');
+
+                foreach ($pesanan->items as $item) {
+                    $item->barang->increment(
+                        'Stok',
+                        $item->jumlah
+                    );
+                }
+            }
+
+            $pesanan->update([
+                'status' => $statusBaru,
+            ]);
+
+            return $pesanan->fresh([
+                'user',
+                'alamat',
+                'lokasiToko',
+                'items.barang',
+                'pembayaran',
+            ]);
+        });
     }
 }

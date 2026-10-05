@@ -29,7 +29,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'google_id', 'avatar','no_hp'])]
+#[Fillable(['name', 'email', 'password', 'google_id', 'avatar','no_hp', 'role', 'lokasi_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -67,5 +67,10 @@ class User extends Authenticatable
     public function notifikasi()
     {
         return $this->hasMany(Notifikasi::class);
+    }
+
+    public function lokasi()
+    {
+        return $this->belongsTo(Lokasi::class, 'lokasi_id');
     }
 }

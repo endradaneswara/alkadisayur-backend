@@ -63,6 +63,7 @@ class PembayaranController extends Controller
         string $id
     ) {
         $pembayaran = $this->pembayaranService->update(
+            $request->user(),
             $id,
             $request->validated()
         );

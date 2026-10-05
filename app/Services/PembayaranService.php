@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Pembayaran;
 use App\Models\Pesanan;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -70,10 +71,19 @@ class PembayaranService
     }
 
     public function update(
+        User $user,
         string|int $id,
         array $data
     ): Pembayaran {
-        $pembayaran = Pembayaran::findOrFail($id);
+        $query = Pembayaran::with('pesanan');
+
+        if ($user->role === 'admin') {
+            $query->whereHas('pesanan', function ($query) use ($user) {
+                $query->where('lokasi_toko_id', $user->lokasi_id);
+            });
+        }
+
+        $pembayaran = $query->findOrFail($id);
 
         $pembayaran->update([
             'status' => $data['status'],

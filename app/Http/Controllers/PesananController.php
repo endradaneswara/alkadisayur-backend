@@ -43,10 +43,8 @@ class PesananController extends Controller
         );
     }
 
-    public function show(
-        Request $request,
-        string $id
-    ) {
+    public function show(Request $request, string $id)
+    {
         $pesanan = $this->pesananService->show(
             $request->user()->id,
             $id
@@ -58,25 +56,8 @@ class PesananController extends Controller
         );
     }
 
-    public function update(
-        UpdatePesananRequest $request,
-        string $id
-    ) {
-        $pesanan = $this->pesananService->update(
-            $id,
-            $request->validated()
-        );
-
-        return $this->success(
-            new PesananResource($pesanan),
-            'Status pesanan berhasil diperbarui.'
-        );
-    }
-
-    public function destroy(
-        Request $request,
-        string $id
-    ) {
+    public function destroy(Request $request, string $id)
+    {
         $pesanan = $this->pesananService->cancel(
             $request->user()->id,
             $id
@@ -85,6 +66,49 @@ class PesananController extends Controller
         return $this->success(
             new PesananResource($pesanan),
             'Pesanan berhasil dibatalkan.'
+        );
+    }
+
+    public function adminIndex(Request $request)
+    {
+        $user = $request->user();
+
+        $pesanan = $this->pesananService->adminIndex(
+            $user
+        );
+
+        return $this->success(
+            PesananResource::collection($pesanan),
+            'Daftar pesanan masuk berhasil diambil.'
+        );
+    }
+
+    public function adminShow(Request $request, string $id)
+    {
+        $pesanan = $this->pesananService->adminShow(
+            $request->user(),
+            $id
+        );
+
+        return $this->success(
+            new PesananResource($pesanan),
+            'Detail pesanan berhasil diambil.'
+        );
+    }
+
+    public function updateStatus(
+        UpdatePesananRequest $request,
+        string $id
+    ) {
+        $pesanan = $this->pesananService->updateStatus(
+            $request->user(),
+            $id,
+            $request->validated()
+        );
+
+        return $this->success(
+            new PesananResource($pesanan),
+            'Status pesanan berhasil diperbarui.'
         );
     }
 }

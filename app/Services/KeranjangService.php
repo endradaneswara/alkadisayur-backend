@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Barang;
 use App\Models\Keranjang;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -79,27 +78,36 @@ class KeranjangService
         string|int $itemId,
         array $data
     ): Keranjang {
-        $keranjang = Keranjang::where('user_id', $userId)
-            ->firstOrFail();
+        return DB::transaction(function () use ($userId, $itemId, $data) {
 
-        $item = $keranjang->items()
-            ->with('barang')
-            ->findOrFail($itemId);
+            $keranjang = Keranjang::where('user_id', $userId)
+                ->firstOrFail();
 
-        if ($data['jumlah'] > $item->barang->Stok) {
-            throw ValidationException::withMessages([
-                'jumlah' => ['Jumlah barang melebihi stok yang tersedia.'],
+            $item = $keranjang->items()
+                ->with('barang')
+                ->findOrFail($itemId);
+
+            if ($item->barang->status !== 'tersedia') {
+                throw ValidationException::withMessages([
+                    'barang_id' => ['Barang sedang tidak tersedia.'],
+                ]);
+            }
+
+            if ($data['jumlah'] > $item->barang->Stok) {
+                throw ValidationException::withMessages([
+                    'jumlah' => ['Jumlah barang melebihi stok yang tersedia.'],
+                ]);
+            }
+
+            $item->update([
+                'jumlah' => $data['jumlah'],
+                'harga' => $item->barang->HargaJual,
             ]);
-        }
 
-        $item->update([
-            'jumlah' => $data['jumlah'],
-            'harga' => $item->barang->HargaJual,
-        ]);
-
-        return $keranjang->load([
-            'items.barang.kategori',
-        ]);
+            return $keranjang->load([
+                'items.barang.kategori',
+            ]);
+        });
     }
 
     public function destroy(

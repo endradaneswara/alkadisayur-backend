@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -47,16 +48,46 @@ class AuthController extends Controller
             ->stateless()
             ->user();
 
-        $user = User::updateOrCreate(
-            [
+        if (! $googleUser->getEmail()) {
+            throw ValidationException::withMessages([
+                'email' => ['Email Google tidak tersedia.'],
+            ]);
+        }
+
+        if (! ($googleUser->user['email_verified'] ?? false)) {
+            throw ValidationException::withMessages([
+                'email' => ['Email Google belum terverifikasi.'],
+            ]);
+        }
+
+        $user = User::where(
+            'google_id',
+            $googleUser->getId()
+        )->first();
+
+        if (! $user) {
+            $user = User::where(
+                'email',
+                $googleUser->getEmail()
+            )->first();
+        }
+
+        if ($user) {
+            $user->update([
                 'google_id' => $googleUser->getId(),
-            ],
-            [
+                'name' => $googleUser->getName(),
+                'avatar' => $googleUser->getAvatar(),
+            ]);
+        } else {
+            $user = User::create([
                 'name' => $googleUser->getName(),
                 'email' => $googleUser->getEmail(),
+                'password' => Str::random(32),
+                'google_id' => $googleUser->getId(),
                 'avatar' => $googleUser->getAvatar(),
-            ]
-        );
+                'role' => 'customer',
+            ]);
+        }
 
         $token = $user->createToken('api-token')->plainTextToken;
 

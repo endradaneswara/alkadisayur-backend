@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('barang', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kategori_id')->constrained('kategori')->onDelete('cascade');
-            $table->string('KodeItem', 50);
+            $table->foreignId('kategori_id')->constrained('kategori')->onDelete('restrictOnDelete');
+            $table->string('KodeItem', 50)->unique();
             $table->string('Barcode', 50)->unique();
             $table->string('SKU', 50)->unique();
             $table->string('NamaItem', 100);
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->decimal('HargaJual', 12, 2);
             $table->text('Keterangan')->nullable();
             $table->string('Foto')->nullable();
-            $table->enum('Status', ['tersedia', 'tidak tersedia'])->default('tersedia');
+            $table->enum('Status', ['tersedia', 'tidak_tersedia'])->default('tersedia');
             $table->timestamps();
         });
     }

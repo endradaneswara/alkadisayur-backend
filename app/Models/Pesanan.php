@@ -55,12 +55,12 @@ class Pesanan extends Model
 
     public function lokasi(): BelongsTo
     {
-        return $this->BelongsTo(Lokasi::class);
+        return $this->belongsTo(Lokasi::class);
     }
 
     public function pesananItem(): HasMany
     {
-        return $this->HasMany(PesananItem::class);
+        return $this->hasMany(PesananItem::class);
     }
 
 }

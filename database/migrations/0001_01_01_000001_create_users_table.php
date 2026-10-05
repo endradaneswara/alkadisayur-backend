@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('google_id')->nullable()->unique();
             $table->string('avatar')->nullable();
             $table->enum('role', ['superAdmin', 'admin', 'customer'])->default('customer');
+            $table->foreignId('lokasi_id')->nullable()->constrained('lokasi')->nullOnDelete();
             $table->string('no_hp', 20)->nullable();
             $table->rememberToken();
             $table->timestamps();
