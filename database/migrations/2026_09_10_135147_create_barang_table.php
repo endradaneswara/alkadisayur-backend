@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('barang', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kategori_id')->constrained('kategori')->onDelete('restrictOnDelete');
+            $table->foreignId('kategori_id')->constrained('kategori')->onDelete('restrict');
             $table->string('KodeItem', 50)->unique();
             $table->string('Barcode', 50)->unique();
             $table->string('SKU', 50)->unique();

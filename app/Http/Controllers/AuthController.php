@@ -8,11 +8,34 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use App\Http\Requests\RegisterRequest;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
     use ApiResponse;
+
+    public function register(RegisterRequest $request)
+    {
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'customer',
+        ]);
+
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return $this->success([
+            'user' => $user->only([
+                'id',
+                'name',
+                'email',
+                'role',
+            ]),
+            'token' => $token,
+        ], 'Registrasi akun berhasil.');
+    }
 
     public function login(Request $request)
     {

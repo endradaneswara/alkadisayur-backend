@@ -17,9 +17,13 @@ class PembayaranResource extends JsonResource
             'jumlah' => $this->jumlah,
             'transaksi_id' => $this->transaksi_id,
             'tanggal_pembayaran' => $this->tanggal_pembayaran,
-            'pesanan' => new PesananResource(
-                $this->whenLoaded('pesanan')
-            ),
+            'pesanan' => $this->whenLoaded('pesanan', function () {
+                return [
+                    'id' => $this->pesanan->id,
+                    'nomor_order' => $this->pesanan->nomor_order,
+                    'status' => $this->pesanan->status,
+                ];
+            }),
         ];
     }
 }

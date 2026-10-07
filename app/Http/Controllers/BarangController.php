@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBarangRequest;
 use App\Http\Requests\UpdateBarangRequest;
+use App\Http\Resources\BarangCustomerResource;
 use App\Http\Resources\BarangResource;
 use App\Services\BarangService;
 use App\Traits\ApiResponse;
@@ -17,6 +18,13 @@ class BarangController extends Controller
     public function index()
     {
         $barang = $this->barangService->index();
+
+        if (request()->user()->role === 'customer') {
+            return $this->success(
+                BarangCustomerResource::collection($barang),
+                'Daftar barang berhasil diambil.'
+            );
+        }
 
         return $this->success(
             BarangResource::collection($barang),
@@ -38,6 +46,13 @@ class BarangController extends Controller
     public function show(string $id)
     {
         $barang = $this->barangService->show($id);
+
+        if (request()->user()->role === 'customer') {
+            return $this->success(
+                new BarangCustomerResource($barang),
+                'Detail barang berhasil diambil.'
+            );
+        }
 
         return $this->success(
             new BarangResource($barang),
@@ -68,3 +83,4 @@ class BarangController extends Controller
         );
     }
 }
+

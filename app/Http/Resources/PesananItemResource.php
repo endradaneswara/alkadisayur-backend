@@ -16,9 +16,11 @@ class PesananItemResource extends JsonResource
             'jumlah' => $this->jumlah,
             'harga' => $this->harga,
             'subtotal' => $this->subtotal,
-            'barang' => new BarangResource(
-                $this->whenLoaded('barang')
-            ),
+            'barang' => $this->whenLoaded('barang', function () {
+                return [
+                    'NamaItem' => $this->barang->NamaItem,
+                ];
+            }),
         ];
     }
 }

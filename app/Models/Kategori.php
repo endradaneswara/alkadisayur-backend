@@ -16,9 +16,6 @@ class Kategori extends Model
         'nama_kategori',
     ];
 
-    /**
-     * Get the items in this category.
-     */
     public function barang(): HasMany
     {
         return $this->hasMany(Barang::class);

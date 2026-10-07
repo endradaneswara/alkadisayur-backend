@@ -17,9 +17,13 @@ class NotifikasiResource extends JsonResource
             'pesan' => $this->pesan,
             'dibaca_pada' => $this->dibaca_pada,
             'sudah_dibaca' => $this->dibaca_pada !== null,
-            'pesanan' => new PesananResource(
-                $this->whenLoaded('pesanan')
-            ),
+            'pesanan' => $this->whenLoaded('pesanan', function () {
+                return [
+                    'id' => $this->pesanan->id,
+                    'nomor_order' => $this->pesanan->nomor_order,
+                    'status' => $this->pesanan->status,
+                ];
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

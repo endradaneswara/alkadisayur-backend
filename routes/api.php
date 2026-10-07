@@ -14,8 +14,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PasswordController;
 
 use Illuminate\Support\Facades\Route;
+
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:5,1');
 
 Route::post('/login', [AuthController::class, 'login'])->name('login')
     ->middleware('throttle:5,1');
@@ -26,6 +31,11 @@ Route::get('/auth/google/callback', [AuthController::class, 'callbackGoogle']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])
         ->middleware('throttle:10,1');
+
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [PasswordController::class, 'update'])
+        ->middleware('throttle:5,1');
 
     Route::get('/kategori', [KategoriController::class, 'index']);
     Route::get('/kategori/{id}', [KategoriController::class, 'show'])

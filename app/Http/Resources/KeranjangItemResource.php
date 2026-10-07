@@ -12,12 +12,10 @@ class KeranjangItemResource extends JsonResource
         return [
             'id' => $this->id,
             'barang_id' => $this->barang_id,
+            'nama_barang' => $this->barang?->NamaItem,
             'jumlah' => $this->jumlah,
             'harga' => $this->harga,
             'subtotal' => $this->jumlah * $this->harga,
-            'barang' => new BarangResource(
-                $this->whenLoaded('barang')
-            ),
         ];
     }
 }
