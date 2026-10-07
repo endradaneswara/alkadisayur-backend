@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Keranjang;
+use App\Models\Lokasi;
 use App\Models\Pesanan;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -46,11 +47,15 @@ class PesananService
     ): Pesanan {
         return DB::transaction(function () use ($userId, $data) {
 
-            $keranjang = Keranjang::with('items.barang')
-                ->where('user_id', $userId)
+            $keranjang = Keranjang::where('user_id', $userId)
+                ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($keranjang->items->isEmpty()) {
+            $items = $keranjang->items()
+                ->with('barang')
+                ->get();
+
+            if ($items->isEmpty()) {
                 throw ValidationException::withMessages([
                     'keranjang' => ['Keranjang masih kosong.'],
                 ]);
@@ -75,32 +80,42 @@ class PesananService
                 ]);
             }
 
-            foreach ($keranjang->items as $item) {
+            $lokasi = Lokasi::findOrFail(
+                $data['lokasi_toko_id']
+            );
 
-                if ($item->barang->status !== 'tersedia') {
+            foreach ($items as $item) {
+
+                $barang = $item->barang()
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($barang->status !== 'tersedia') {
                     throw ValidationException::withMessages([
                         'barang' => [
-                            "Barang {$item->barang->NamaItem} sudah tidak tersedia."
+                            "Barang {$barang->NamaItem} sudah tidak tersedia."
                         ],
                     ]);
                 }
 
-                if ($item->barang->Stok < $item->jumlah) {
+                if ($barang->Stok < $item->jumlah) {
                     throw ValidationException::withMessages([
                         'stok' => [
-                            "Stok {$item->barang->NamaItem} tidak mencukupi."
+                            "Stok {$barang->NamaItem} tidak mencukupi."
                         ],
                     ]);
                 }
+
+                $item->setRelation('barang', $barang);
             }
 
-            $totalHarga = $keranjang->items->sum(
+            $totalHarga = $items->sum(
                 fn ($item) =>
                     $item->jumlah * $item->barang->HargaJual
             );
 
             $biayaPengiriman = $data['metode'] === 'pesan antar'
-                ? ($data['biaya_pengiriman'] ?? 0)
+                ? $lokasi->biaya_pengiriman
                 : 0;
 
             $pesanan = Pesanan::create([
@@ -127,7 +142,7 @@ class PesananService
                 'tanggal_pemesanan' => now(),
             ]);
 
-            foreach ($keranjang->items as $item) {
+            foreach ($items as $item) {
 
                 $harga = $item->barang->HargaJual;
 
@@ -159,7 +174,7 @@ class PesananService
         string|int $userId,
         string|int $id
     ): Pesanan {
-        $pesanan = Pesanan::with('items.barang')
+        $pesanan = Pesanan::with('items')
             ->where('user_id', $userId)
             ->findOrFail($id);
 
@@ -181,7 +196,12 @@ class PesananService
             ]);
 
             foreach ($pesanan->items as $item) {
-                $item->barang->increment(
+
+                $barang = $item->barang()
+                    ->lockForUpdate()
+                    ->first();
+
+                $barang->increment(
                     'Stok',
                     $item->jumlah
                 );
@@ -316,10 +336,15 @@ class PesananService
 
             if ($statusBaru === 'dibatalkan') {
 
-                $pesanan->load('items.barang');
+                $pesanan->load('items');
 
                 foreach ($pesanan->items as $item) {
-                    $item->barang->increment(
+
+                    $barang = $item->barang()
+                        ->lockForUpdate()
+                        ->first();
+
+                    $barang->increment(
                         'Stok',
                         $item->jumlah
                     );

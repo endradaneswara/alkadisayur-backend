@@ -25,6 +25,12 @@ Route::post('/register', [AuthController::class, 'register'])
 Route::post('/login', [AuthController::class, 'login'])->name('login')
     ->middleware('throttle:5,1');
 
+Route::post('/forgot-password', [PasswordController::class, 'forgot'])
+    ->middleware('throttle:5,1');
+
+Route::post('/reset-password', [PasswordController::class, 'reset'])
+    ->middleware('throttle:5,1');
+
 Route::get('/auth/google', [AuthController::class, 'redirectGoogle']);
 Route::get('/auth/google/callback', [AuthController::class, 'callbackGoogle']);
 
@@ -120,6 +126,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::apiResource('lokasi', LokasiController::class)
             ->only(['store', 'update', 'destroy']);
+        Route::put('/lokasi/{id}/biayaPengiriman', [LokasiController::class, 'updateBiayaPengiriman'])
+            ->whereNumber('id');
 
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/users/{id}', [UserController::class, 'show'])

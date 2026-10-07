@@ -17,6 +17,7 @@ class Lokasi extends Model
         'latitude',
         'longitude',
         'deskripsi',
+        'biaya_pengiriman',
     ];
 
     protected function casts(): array

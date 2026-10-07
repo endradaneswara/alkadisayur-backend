@@ -31,6 +31,19 @@ class LokasiService
         return $lokasi->fresh();
     }
 
+    public function updateBiayaPengiriman(
+        string|int $id,
+        array $data
+    ): Lokasi {
+        $lokasi = Lokasi::findOrFail($id);
+
+        $lokasi->update([
+            'biaya_pengiriman' => $data['biaya_pengiriman'],
+        ]);
+
+        return $lokasi->fresh();
+    }
+
     public function destroy(string|int $id): void
     {
         Lokasi::findOrFail($id)->delete();

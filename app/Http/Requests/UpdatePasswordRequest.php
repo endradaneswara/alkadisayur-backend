@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PasswordUpdateRequest extends FormRequest
+class UpdatePasswordRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,7 +15,8 @@ class PasswordUpdateRequest extends FormRequest
     {
         return [
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+            'new_password_confirmation' => ['required', 'string', 'min:8'],
         ];
     }
 
@@ -24,9 +25,11 @@ class PasswordUpdateRequest extends FormRequest
         return [
             'current_password.required' => 'Password saat ini wajib diisi.',
             'current_password.current_password' => 'Password saat ini salah.',
-            'password.required' => 'Password baru wajib diisi.',
-            'password.min' => 'Password baru minimal 8 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak sesuai.',
+            'new_password.required' => 'Password baru wajib diisi.',
+            'new_password.min' => 'Password baru minimal 8 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password tidak sesuai.',
+            'new_password_confirmation.required' => 'Konfirmasi password wajib diisi.',
+            'new_password_confirmation.min' => 'Konfirmasi password minimal 8 karakter.',
         ];
     }
 }

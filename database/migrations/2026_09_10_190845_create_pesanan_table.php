@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('lokasi_toko_id')->nullable()->constrained('lokasi')->onDelete('restrict');
             $table->string('nomor_order')->unique();
             $table->decimal('total_harga', 12, 2);
-            $table->decimal('biaya_pengiriman', 12, 2);
+            $table->decimal('biaya_pengiriman', 12, 2)->default(0);
             $table->enum('metode', ['pesan_antar', 'ambil_ditoko']);
             $table->enum('status', ['pending', 'diproses', 'dikirim', 'selesai', 'dibatalkan'])->default('pending');
             $table->text('catatan')->nullable();

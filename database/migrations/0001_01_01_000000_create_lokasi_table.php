@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
             $table->text('deskripsi')->nullable();
+            $table->decimal('biaya_pengiriman', 12, 2)->default(0);
             $table->softDeletes();
             $table->unique(['nama', 'latitude', 'longitude']);
             $table->timestamps();
