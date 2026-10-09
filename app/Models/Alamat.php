@@ -27,9 +27,6 @@ class Alamat extends Model
         ];
     }
 
-    /**
-     * Get the user who owns this address.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

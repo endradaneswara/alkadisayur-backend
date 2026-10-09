@@ -27,10 +27,7 @@ class DashboardService
             'total_penjualan' => Pesanan::where('status', 'selesai')
                 ->sum(DB::raw('total_harga + biaya_pengiriman')),
             'stok_menipis' => Barang::where('Stok', '<=', 3)->count(),
-            'produk_tidak_tersedia' => Barang::where(
-                'status',
-                'tidak tersedia'
-            )->count(),
+            'produk_tidak_tersedia' => Barang::where('Status', 'tidak_tersedia')->count(),
         ];
     }
 }

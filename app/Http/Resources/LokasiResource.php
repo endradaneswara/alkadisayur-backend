@@ -15,6 +15,7 @@ class LokasiResource extends JsonResource
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
             'deskripsi' => $this->deskripsi,
+            'biaya_pengiriman' => $this->biaya_pengiriman,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

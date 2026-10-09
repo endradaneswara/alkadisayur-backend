@@ -18,6 +18,7 @@ class StoreLokasiRequest extends FormRequest
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'deskripsi' => ['nullable', 'string'],
+            'biaya_pengiriman' => ['required', 'numeric', 'min:0'],
         ];
     }
 }

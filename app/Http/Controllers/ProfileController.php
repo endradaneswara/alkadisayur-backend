@@ -22,6 +22,7 @@ class ProfileController extends Controller
                 'no_hp',
                 'avatar',
                 'role',
+                'email_verified_at',
             ]),
             'Data profile berhasil diambil.'
         );
@@ -30,8 +31,18 @@ class ProfileController extends Controller
     public function update(UpdateProfileRequest $request)
     {
         $user = $request->user();
+        $data = $request->validated();
+        $emailChanged = isset($data['email']) && $user->email !== $data['email'];
 
-        $user->update($request->validated());
+        if ($emailChanged) {
+            $data['email_verified_at'] = null;
+        }
+
+        $user->forceFill($data)->save();
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return $this->success(
             $user->only([
@@ -41,6 +52,7 @@ class ProfileController extends Controller
                 'no_hp',
                 'avatar',
                 'role',
+                'email_verified_at',
             ]),
             'Data profile berhasil diperbarui.'
         );

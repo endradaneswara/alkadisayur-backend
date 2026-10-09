@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use App\Models\Notifikasi;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotifikasiService
 {
-    public function index(string|int $userId): Collection
+    public function index(string|int $userId): LengthAwarePaginator
     {
         return Notifikasi::with('pesanan')
             ->where('user_id', $userId)
             ->latest()
-            ->get();
+            ->paginate(20);
     }
 
     public function show(

@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Models\Lokasi;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class LokasiService
 {
-    public function index(): Collection
+    public function index(): LengthAwarePaginator
     {
-        return Lokasi::all();
+        return Lokasi::query()
+            ->orderBy('id')
+            ->paginate(20);
     }
 
     public function show(string|int $id): Lokasi
@@ -27,19 +29,6 @@ class LokasiService
         $lokasi = Lokasi::findOrFail($id);
 
         $lokasi->update($data);
-
-        return $lokasi->fresh();
-    }
-
-    public function updateBiayaPengiriman(
-        string|int $id,
-        array $data
-    ): Lokasi {
-        $lokasi = Lokasi::findOrFail($id);
-
-        $lokasi->update([
-            'biaya_pengiriman' => $data['biaya_pengiriman'],
-        ]);
 
         return $lokasi->fresh();
     }

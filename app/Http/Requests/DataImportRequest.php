@@ -8,18 +8,15 @@ class DataImportRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->role === 'superAdmin';
     }
 
     public function rules(): array
     {
         return [
-            'file' => [
-                'required',
-                'file',
-                'mimes:xlsx,xls,csv',
-                'max:10240',
-            ],
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
+            'confirmed' => ['sometimes', 'boolean'],
+            'preview_hash' => ['required_if:confirmed,1,true', 'nullable', 'string', 'size:64'],
         ];
     }
 

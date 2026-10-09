@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use App\Models\Ulasan;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 
 class UlasanService
 {
-    public function index(): Collection
+    public function index(): LengthAwarePaginator
     {
         return Ulasan::with('user')
             ->latest()
-            ->get();
+            ->paginate(20);
     }
 
     public function show(string|int $id): Ulasan

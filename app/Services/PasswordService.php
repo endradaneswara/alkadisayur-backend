@@ -2,53 +2,87 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use App\Notifications\PasswordResetOtp;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class PasswordService
 {
-    public function sendResetLink(string $email): string
-    {
-        $status = Password::sendResetLink([
-            'email' => $email,
-        ]);
+    private const OTP_EXPIRY_MINUTES = 10;
 
-        if ($status !== Password::RESET_LINK_SENT) {
-            throw ValidationException::withMessages([
-                'email' => [
-                    'Email tidak ditemukan atau reset password gagal dikirim.'
-                ],
-            ]);
+    public function sendResetOtp(string $email): void
+    {
+        $user = User::where('email', $email)->first();
+
+        if ($user === null) {
+            return;
         }
 
-        return $status;
+        $otp = (string) random_int(0, 999999);
+        $otp = str_pad($otp, 6, '0', STR_PAD_LEFT);
+        $hashedOtp = Hash::make($otp);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'token' => $hashedOtp,
+                'created_at' => now(),
+            ]
+        );
+
+        try {
+            $user->notify(new PasswordResetOtp($otp));
+        } catch (Throwable $exception) {
+            DB::table('password_reset_tokens')
+                ->where('email', $user->email)
+                ->where('token', $hashedOtp)
+                ->delete();
+
+            throw $exception;
+        }
     }
 
     public function resetPassword(array $data): void
     {
-        $status = Password::reset(
-            [
-                'email' => $data['email'],
-                'password' => $data['password'],
-                'password_confirmation' => $data['password_confirmation'],
-                'token' => $data['token'],
-            ],
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                ])->save();
+        DB::transaction(function () use ($data): void {
+            $user = User::where('email', $data['email'])
+                ->lockForUpdate()
+                ->first();
+            $resetOtp = DB::table('password_reset_tokens')
+                ->where('email', $data['email'])
+                ->lockForUpdate()
+                ->first();
 
-                $user->tokens()->delete();
+            $createdAt = $resetOtp?->created_at === null
+                ? null
+                : Carbon::parse($resetOtp->created_at);
+
+            $isOtpValid = $createdAt !== null
+                && $createdAt->greaterThan(now()->subMinutes(self::OTP_EXPIRY_MINUTES))
+                && $createdAt->lessThanOrEqualTo(now())
+                && Hash::check($data['otp'], $resetOtp->token);
+
+            if ($user === null || ! $isOtpValid) {
+                throw ValidationException::withMessages([
+                    'otp' => [
+                        'Kode OTP tidak valid atau sudah kedaluwarsa.',
+                    ],
+                ]);
             }
-        );
 
-        if ($status !== Password::PASSWORD_RESET) {
-            throw ValidationException::withMessages([
-                'email' => [
-                    'Token reset password tidak valid atau sudah kedaluwarsa.'
-                ],
-            ]);
-        }
+            $user->forceFill([
+                'password' => $data['password'],
+            ])->save();
+
+            $user->tokens()->delete();
+
+            DB::table('password_reset_tokens')
+                ->where('email', $user->email)
+                ->delete();
+        });
     }
 }

@@ -33,6 +33,27 @@ test('profile information can be updated', function () {
     expect($user->email_verified_at)->toBeNull();
 });
 
+test('profile can be updated with only the name', function () {
+    $user = User::factory()->create([
+        'name' => 'Old Name',
+        'email' => 'unchanged@example.com',
+    ]);
+    $verifiedAt = $user->email_verified_at;
+
+    $this->actingAs($user)
+        ->patch(route('profile.update'), [
+            'name' => 'New Name',
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('profile.edit'));
+
+    $user->refresh();
+
+    expect($user->name)->toBe('New Name')
+        ->and($user->email)->toBe('unchanged@example.com')
+        ->and($user->email_verified_at->equalTo($verifiedAt))->toBeTrue();
+});
+
 test('email verification status is unchanged when the email address is unchanged', function () {
     $user = User::factory()->create();
 

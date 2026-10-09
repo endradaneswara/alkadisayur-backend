@@ -28,7 +28,7 @@ trait ProfileValidationRules
      */
     protected function nameRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        return ['sometimes', 'required', 'string', 'max:255'];
     }
 
     /**
@@ -39,6 +39,7 @@ trait ProfileValidationRules
     protected function emailRules(?int $userId = null): array
     {
         return [
+            'sometimes',
             'required',
             'string',
             'email',

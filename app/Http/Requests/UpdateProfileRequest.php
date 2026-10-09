@@ -15,19 +15,18 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()?->id),],
-            'no_hp' => ['nullable', 'string', 'max:20'],
-            'avatar' => ['nullable', 'string', 'max:255'],
+            'name' => ['sometimes', 'required', 'string', 'max:100'],
+            'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()?->id)],
+            'no_hp' => ['sometimes', 'string', 'max:20'],
+            'avatar' => ['sometimes', 'string', 'max:255'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama wajib diisi.',
+            'name.required' => 'Nama tidak boleh kosong.',
             'name.max' => 'Nama maksimal 100 karakter.',
-            'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan.',
             'no_hp.max' => 'Nomor HP maksimal 20 karakter.',

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreLokasiRequest;
-use App\Http\Requests\UpdateBiayaPengirimanRequest;
 use App\Http\Requests\UpdateLokasiRequest;
 use App\Http\Resources\LokasiResource;
 use App\Services\LokasiService;
@@ -66,10 +65,10 @@ class LokasiController extends Controller
     }
 
     public function updateBiayaPengiriman(
-        UpdateBiayaPengirimanRequest $request,
+        UpdateLokasiRequest $request,
         string $id
     ) {
-        $lokasi = $this->lokasiService->updateBiayaPengiriman(
+        $lokasi = $this->lokasiService->update(
             $id,
             $request->validated()
         );

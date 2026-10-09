@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreBarangRequest extends FormRequest
 {
@@ -15,9 +16,9 @@ class StoreBarangRequest extends FormRequest
     {
         return [
             'kategori_id' => ['required', 'integer', 'exists:kategori,id'],
-            'KodeItem' => ['required', 'string', 'max:50'],
-            'Barcode' => ['required', 'string', 'max:50'],
-            'SKU' => ['required', 'string', 'max:50'],
+            'KodeItem' => ['required', 'string', 'max:50', Rule::unique('barang', 'KodeItem')],
+            'Barcode' => ['required', 'string', 'max:50', Rule::unique('barang', 'Barcode')],
+            'SKU' => ['required', 'string', 'max:50', Rule::unique('barang', 'SKU')],
             'NamaItem' => ['required', 'string', 'max:100'],
             'Merek' => ['nullable', 'string', 'max:100'],
             'Stok' => ['required', 'integer', 'min:0'],

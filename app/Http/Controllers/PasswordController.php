@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\LupaPasswordRequest;
 use App\Http\Requests\ResetPasswordRequest;
+use App\Http\Requests\UpdatePasswordRequest;
 use App\Services\PasswordService;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Hash;
@@ -19,13 +19,13 @@ class PasswordController extends Controller
 
     public function forgot(LupaPasswordRequest $request)
     {
-        $this->passwordService->sendResetLink(
+        $this->passwordService->sendResetOtp(
             $request->email
         );
 
         return $this->success(
             null,
-            'Link reset password berhasil dikirim ke email.'
+            'Jika email terdaftar, kode OTP reset password akan dikirim.'
         );
     }
 

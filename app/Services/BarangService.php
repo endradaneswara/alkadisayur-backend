@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Models\Barang;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class BarangService
 {
-    public function index(): Collection
+    public function index(): LengthAwarePaginator
     {
-        return Barang::with('kategori')->get();
+        return Barang::with('kategori')
+            ->orderBy('id')
+            ->paginate(20);
     }
 
     public function show(string|int $id): Barang

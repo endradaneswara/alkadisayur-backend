@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Pesanan extends Model
 {
@@ -55,12 +55,21 @@ class Pesanan extends Model
 
     public function lokasi(): BelongsTo
     {
-        return $this->belongsTo(Lokasi::class);
+        return $this->lokasiToko();
+    }
+
+    public function lokasiToko(): BelongsTo
+    {
+        return $this->belongsTo(Lokasi::class, 'lokasi_toko_id');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PesananItem::class, 'pesanan_id');
     }
 
     public function pesananItem(): HasMany
     {
-        return $this->hasMany(PesananItem::class);
+        return $this->items();
     }
-
 }

@@ -16,9 +16,9 @@ class UpdateBarangRequest extends FormRequest
     {
         return [
             'kategori_id' => ['sometimes', 'required', 'integer', 'exists:kategori,id'],
-            'KodeItem' => ['sometimes', 'required', 'string', 'max:50'],
-            'Barcode' => ['sometimes', 'required', 'string', 'max:50'],
-            'SKU' => ['sometimes', 'required', 'string', 'max:50'],
+            'KodeItem' => ['sometimes', 'required', 'string', 'max:50', Rule::unique('barang', 'KodeItem')->ignore($this->route('barang') ?? $this->route('id'))],
+            'Barcode' => ['sometimes', 'required', 'string', 'max:50', Rule::unique('barang', 'Barcode')->ignore($this->route('barang') ?? $this->route('id'))],
+            'SKU' => ['sometimes', 'required', 'string', 'max:50', Rule::unique('barang', 'SKU')->ignore($this->route('barang') ?? $this->route('id'))],
             'NamaItem' => ['sometimes', 'required', 'string', 'max:100'],
             'Merek' => ['nullable', 'string', 'max:100'],
             'Stok' => ['sometimes', 'required', 'integer', 'min:0'],

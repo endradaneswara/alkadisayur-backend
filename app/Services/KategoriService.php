@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Models\Kategori;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class KategoriService
 {
-    public function index(): Collection
+    public function index(): LengthAwarePaginator
     {
-        return Kategori::all();
+        return Kategori::query()
+            ->orderBy('id')
+            ->paginate(20);
     }
 
     public function show(string|int $id): Kategori
@@ -35,13 +37,13 @@ class KategoriService
         Kategori::findOrFail($id)->delete();
     }
 
-    public function barang(string|int $id): Collection
+    public function barang(string|int $id): LengthAwarePaginator
     {
-    $kategori = Kategori::findOrFail($id);
+        $kategori = Kategori::findOrFail($id);
 
-    return $kategori->barang()
-        ->with('kategori')
-        ->get();
+        return $kategori->barang()
+            ->with('kategori')
+            ->orderBy('id')
+            ->paginate(20);
     }
-    
 }

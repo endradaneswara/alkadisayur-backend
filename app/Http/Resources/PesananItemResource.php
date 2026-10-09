@@ -13,6 +13,7 @@ class PesananItemResource extends JsonResource
             'id' => $this->id,
             'pesanan_id' => $this->pesanan_id,
             'barang_id' => $this->barang_id,
+            'nama_barang' => $this->nama_barang,
             'jumlah' => $this->jumlah,
             'harga' => $this->harga,
             'subtotal' => $this->subtotal,
