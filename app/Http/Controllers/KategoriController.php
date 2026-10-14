@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreKategoriRequest;
 use App\Http\Requests\UpdateKategoriRequest;
-use App\Http\Resources\KategoriResource;
+use App\Http\Resources\BarangCustomerResource;
 use App\Http\Resources\BarangResource;
+use App\Http\Resources\KategoriResource;
 use App\Services\KategoriService;
 use App\Traits\ApiResponse;
-use Illuminate\Database\Eloquent\Collection;
 
 class KategoriController extends Controller
 {
@@ -66,11 +66,19 @@ class KategoriController extends Controller
 
     public function barang(string $id)
     {
-    $barang = $this->kategoriService->barang($id);
+        $barang = $this->kategoriService->barang($id);
+        $user = request()->user();
 
-    return $this->success(
-        BarangResource::collection($barang),
-        'Daftar barang berdasarkan kategori berhasil diambil.'
-    );
+        if ($user === null || $user->role === 'customer') {
+            return $this->success(
+                BarangCustomerResource::collection($barang),
+                'Daftar barang berdasarkan kategori berhasil diambil.'
+            );
+        }
+
+        return $this->success(
+            BarangResource::collection($barang),
+            'Daftar barang berdasarkan kategori berhasil diambil.'
+        );
     }
 }

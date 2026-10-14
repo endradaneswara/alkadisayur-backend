@@ -18,8 +18,9 @@ class BarangController extends Controller
     public function index()
     {
         $barang = $this->barangService->index();
+        $user = request()->user();
 
-        if (request()->user()->role === 'customer') {
+        if ($user === null || $user->role === 'customer') {
             return $this->success(
                 BarangCustomerResource::collection($barang),
                 'Daftar barang berhasil diambil.'
@@ -46,8 +47,9 @@ class BarangController extends Controller
     public function show(string $id)
     {
         $barang = $this->barangService->show($id);
+        $user = request()->user();
 
-        if (request()->user()->role === 'customer') {
+        if ($user === null || $user->role === 'customer') {
             return $this->success(
                 new BarangCustomerResource($barang),
                 'Detail barang berhasil diambil.'
@@ -83,4 +85,3 @@ class BarangController extends Controller
         );
     }
 }
-

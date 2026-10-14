@@ -97,6 +97,39 @@ test('a super admin can list, show, update and delete products', function () {
     $this->assertDatabaseMissing('barang', ['id' => $barang->id]);
 });
 
-test('a guest cannot browse products', function () {
-    $this->getJson('/api/barang')->assertUnauthorized();
+test('a guest can browse the public product catalog without administrative data', function () {
+    $kategori = Kategori::factory()->create();
+    $barang = Barang::factory()->create([
+        'kategori_id' => $kategori->id,
+        'KodeItem' => 'PUBLIC-ITEM-1',
+        'Stok' => 7,
+        'HargaBeli' => 1200,
+        'HargaJual' => 2500,
+    ]);
+
+    $this->getJson('/api/barang')
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $barang->id)
+        ->assertJsonPath('data.0.NamaItem', $barang->NamaItem)
+        ->assertJsonPath('data.0.HargaJual', '2500.00')
+        ->assertJsonMissingPath('data.0.Stok')
+        ->assertJsonMissingPath('data.0.HargaBeli')
+        ->assertJsonMissingPath('data.0.KodeItem');
+
+    $this->getJson("/api/barang/{$barang->id}")
+        ->assertOk()
+        ->assertJsonPath('data.id', $barang->id)
+        ->assertJsonMissingPath('data.Stok')
+        ->assertJsonMissingPath('data.HargaBeli');
+});
+
+test('the API accepts cross-origin requests from the local frontend', function () {
+    $this->call('OPTIONS', '/api/barang', [], [], [], [
+        'HTTP_ORIGIN' => 'http://localhost:3000',
+        'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'GET',
+        'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'authorization,content-type',
+    ])
+        ->assertNoContent()
+        ->assertHeader('Access-Control-Allow-Origin', '*')
+        ->assertHeader('Access-Control-Allow-Methods', 'GET');
 });

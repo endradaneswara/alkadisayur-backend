@@ -33,6 +33,20 @@ Route::post('/reset-password', [PasswordController::class, 'reset'])
 Route::get('/auth/google', [AuthController::class, 'redirectGoogle']);
 Route::get('/auth/google/callback', [AuthController::class, 'callbackGoogle']);
 
+Route::get('/kategori', [KategoriController::class, 'index']);
+Route::get('/kategori/{id}', [KategoriController::class, 'show'])
+    ->whereNumber('id');
+Route::get('/kategori/{id}/barang', [KategoriController::class, 'barang'])
+    ->whereNumber('id');
+
+Route::get('/barang', [BarangController::class, 'index']);
+Route::get('/barang/{id}', [BarangController::class, 'show'])
+    ->whereNumber('id');
+
+Route::get('/lokasi', [LokasiController::class, 'index']);
+Route::get('/lokasi/{id}', [LokasiController::class, 'show'])
+    ->whereNumber('id');
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])
         ->middleware('throttle:10,1');
@@ -41,20 +55,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [PasswordController::class, 'update'])
         ->middleware('throttle:5,1');
-
-    Route::get('/kategori', [KategoriController::class, 'index']);
-    Route::get('/kategori/{id}', [KategoriController::class, 'show'])
-        ->whereNumber('id');
-    Route::get('/kategori/{id}/barang', [KategoriController::class, 'barang'])
-        ->whereNumber('id');
-
-    Route::get('/barang', [BarangController::class, 'index']);
-    Route::get('/barang/{id}', [BarangController::class, 'show'])
-        ->whereNumber('id');
-
-    Route::get('/lokasi', [LokasiController::class, 'index']);
-    Route::get('/lokasi/{id}', [LokasiController::class, 'show'])
-        ->whereNumber('id');
 
     Route::middleware('role:customer|admin|superAdmin')->group(function () {
         Route::apiResource('alamat', AlamatController::class);
@@ -118,13 +118,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
 
         Route::apiResource('kategori', KategoriController::class)
-            ->only(['index', 'show', 'store', 'update', 'destroy']);
+            ->only(['store', 'update', 'destroy']);
 
         Route::apiResource('barang', BarangController::class)
-            ->only(['index', 'show', 'store', 'update', 'destroy']);
+            ->only(['store', 'update', 'destroy']);
 
         Route::apiResource('lokasi', LokasiController::class)
-            ->only(['index', 'show', 'store', 'update', 'destroy']);
+            ->only(['store', 'update', 'destroy']);
         Route::put('/lokasi/{id}/biayaPengiriman', [LokasiController::class, 'updateBiayaPengiriman'])
             ->whereNumber('id');
 

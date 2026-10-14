@@ -81,6 +81,16 @@ test('a super admin can list, show, update and delete locations', function () {
     $this->assertSoftDeleted('lokasi', ['id' => $lokasi->id]);
 });
 
-test('a guest cannot list locations', function () {
-    $this->getJson('/api/lokasi')->assertUnauthorized();
+test('a guest can list store locations for checkout', function () {
+    $lokasi = Lokasi::create([
+        'nama' => 'Toko Checkout',
+        'latitude' => -6.20000000,
+        'longitude' => 106.80000000,
+        'biaya_pengiriman' => 12000,
+    ]);
+
+    $this->getJson('/api/lokasi')
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $lokasi->id)
+        ->assertJsonPath('meta.per_page', 20);
 });

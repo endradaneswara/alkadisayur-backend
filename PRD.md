@@ -4,420 +4,390 @@
 
 ### 1. Informasi Produk
 
-**Nama Produk:** AlkadiSayur
-**Jenis Produk:** Website E-Commerce
-**Platform:** Web
-**Backend:** Laravel
-**Database:** MySQL
-**Autentikasi:** Laravel Sanctum dan GoogleOauth
-**Target Pengguna:** Customer dan Admin
+| Informasi | Keterangan |
+| --- | --- |
+| Nama produk | AlkadiSayur |
+| Jenis produk | Website e-commerce |
+| Frontend | Next.js dengan App Router dan routing berbasis folder |
+| Backend | Laravel 13, REST API |
+| Bahasa backend | PHP 8.4 |
+| Database | MySQL |
+| Autentikasi API | Token akses Laravel Sanctum |
+| Login pihak ketiga | Google OAuth melalui Laravel Socialite |
+| Target pengguna | Customer, admin cabang, dan super admin |
+
+Backend Laravel yang ada menjadi sumber data dan otorisasi. Frontend Next.js adalah aplikasi terpisah yang akan mengonsumsi endpoint JSON backend melalui `/api`. Halaman dan route UI tidak menggantikan route API tersebut.
 
 ---
 
 ## 2. Latar Belakang
 
-Toko Alkadi menjual berbagai kebutuhan sehari-hari, mulai dari sayuran, buah, bumbu dapur, bahan pokok, produk hewani, makanan dan minuman, hingga frozen food. Proses pembelian yang masih mengharuskan pelanggan datang langsung ke toko dapat menyulitkan pelanggan dalam mengetahui produk, harga, dan ketersediaan barang yang tersedia.
+Toko Alkadi menjual kebutuhan sehari-hari, termasuk sayuran, buah, bumbu dapur, bahan pokok, produk hewani, makanan dan minuman, serta frozen food. AlkadiSayur mendigitalisasi katalog, keranjang, pemesanan, pembayaran, stok, dan pengelolaan toko.
 
-AlkadiSayur dikembangkan sebagai website e-commerce untuk mempermudah pelanggan dalam melihat katalog produk dan melakukan pembelian secara online. Selain itu, sistem digunakan untuk mendigitalisasi informasi produk, proses pemesanan, pembayaran, pengelolaan stok, dan data penjualan sehingga pengelolaan toko dapat dilakukan secara lebih terstruktur.
+Backend telah menyediakan API untuk alur utama e-commerce dan administrasi. PRD ini mencatat kemampuan backend yang sudah tersedia sekaligus kebutuhan frontend Next.js yang perlu dibangun. Fitur yang belum didukung API ditandai sebagai kebutuhan pengembangan, bukan dianggap sudah berjalan.
 
 ---
 
 ## 3. Tujuan Produk
 
-### Tujuan untuk Customer
+### 3.1 Customer
 
-* Mempermudah pelanggan melihat katalog produk secara online.
-* Mempermudah pencarian dan pemilihan produk.
-* Memungkinkan pelanggan melakukan pemesanan tanpa datang langsung ke toko.
-* Menyediakan pilihan pengiriman atau pengambilan langsung di toko.
-* Memungkinkan pelanggan melihat status dan riwayat pesanan.
-* Menyediakan informasi lokasi toko.
-* Memberikan kesempatan kepada pelanggan untuk memberikan ulasan terhadap toko.
+* Membuat akun dan masuk dengan akun AlkadiSayur atau Google.
+* Melihat produk, kategori, harga, ketersediaan, dan lokasi toko.
+* Mengelola keranjang dan alamat.
+* Memesan barang dengan metode pesan antar atau ambil di toko.
+* Mencatat pembayaran dan memantau status pesanan.
+* Melihat riwayat pesanan, profil, dan notifikasi.
+* Memberikan satu ulasan untuk toko dan mengelola ulasan tersebut.
 
-### Tujuan untuk Admin
+### 3.2 Admin Cabang
 
-* Mempermudah pengelolaan produk dan kategori.
-* Mempermudah pengelolaan stok barang.
-* Mempermudah pengelolaan pesanan pelanggan.
-* Memantau transaksi dan pembayaran.
-* Melihat rekap penjualan.
-* Mengelola lokasi toko.
-* Memasukkan data produk secara massal melalui file Excel.
-* Mengekspor data produk dan penjualan untuk kebutuhan pengelolaan data.
+* Melihat dan memproses pesanan untuk lokasi cabangnya.
+* Memperbarui status pembayaran.
+* Melihat laporan penjualan dan notifikasi yang menjadi hak akses akunnya.
 
----
+### 3.3 Super Admin
 
-# 4. Role Pengguna
-
-## 4.1 Customer
-
-Customer dapat:
-
-* Registrasi akun.
-* Login dan logout.
-* Melihat katalog produk.
-* Mencari dan memfilter produk.
-* Menambahkan produk ke keranjang.
-* Mengatur jumlah barang.
-* Mengelola alamat.
-* Melakukan checkout.
-* Memilih metode pengambilan pesanan.
-* Melakukan pembayaran.
-* Melihat status pesanan.
-* Melihat riwayat pesanan.
-* Memberikan ulasan toko.
-
-## 4.2 Admin
-
-Admin dapat:
-
-* Login ke sistem.
-* Mengakses dashboard admin.
-* Mengelola kategori.
-* Mengelola produk.
-* Mengelola stok.
-* Mengelola pesanan.
-* Mengelola pembayaran.
-* Mengelola lokasi toko.
-* Melihat rekap penjualan.
-* Import data produk.
-* Export data produk.
-* Export data penjualan.
-* Melihat notifikasi pesanan baru.
+* Mengelola produk, kategori, lokasi, dan role pengguna.
+* Memantau dashboard dan seluruh data pesanan/penjualan.
+* Mengimpor dan mengekspor data produk.
 
 ---
 
-# 5. Fitur Utama
+## 4. Role dan Hak Akses
 
-## 5.1 Autentikasi & Role-Based Access
+### 4.1 Customer
 
-Sistem menyediakan registrasi, login, dan logout menggunakan Laravel Sanctum dan GoogleOauth. Halaman yang membutuhkan autentikasi hanya dapat diakses oleh pengguna dengan token yang valid, sedangkan hak akses dibedakan berdasarkan role customer dan admin.
+Customer dapat registrasi, login/logout, mengelola profil dan kata sandi, melihat katalog, mengelola alamat dan keranjang, membuat dan membatalkan pesanan yang masih dapat dibatalkan, membuat pembayaran, melihat riwayatnya, serta mengelola ulasan toko miliknya.
 
----
+### 4.2 Admin
 
-## 5.2 Halaman Utama & Katalog Produk
+Admin cabang dapat melihat pesanan, mengubah status pesanan, memperbarui status pembayaran, serta melihat laporan penjualan dan notifikasi. Data operasional dibatasi ke pesanan/laporan dari `lokasi_id` akun admin. Admin tanpa lokasi cabang tidak memperoleh data pesanan cabang.
 
-Customer dapat melihat halaman utama dan daftar produk yang tersedia pada toko. Informasi produk meliputi nama produk, kategori, harga, stok, foto, merek, dan informasi tambahan lainnya.
+Admin tidak memiliki akses super admin untuk dashboard umum, CRUD produk/kategori/lokasi, manajemen role pengguna, atau import/export produk.
 
----
+### 4.3 Super Admin
 
-## 5.3 Kategori Produk
+Super admin memiliki akses pengelolaan lintas lokasi, termasuk dashboard, produk, kategori, lokasi, role pengguna, laporan penjualan, dan import/export produk.
 
-Produk dikelompokkan berdasarkan kategori untuk mempermudah customer menemukan barang yang dibutuhkan.
-
-Kategori awal meliputi:
-
-* Sayuran
-* Buah
-* Bumbu Dapur
-* Bahan Pokok
-* Hewani
-* Makanan & Minuman
-* Frozen Food
-* Lainnya
-
-Admin dapat mengelola kategori produk.
+Registrasi publik selalu membuat akun dengan role customer. Perubahan role dilakukan melalui pengelolaan pengguna oleh super admin.
 
 ---
 
-## 5.4 Pencarian & Filter Produk
+## 5. Arsitektur Frontend Next.js
 
-Customer dapat mencari produk berdasarkan nama dan menggunakan filter berdasarkan kategori atau kriteria produk tertentu untuk mempercepat proses pencarian.
+### 5.1 Routing Berbasis Folder
 
----
+Frontend menggunakan Next.js App Router. Setiap halaman dibuat sebagai `page.tsx` di dalam folder `app/`; folder bertingkat membentuk URL, sedangkan `layout.tsx` dapat dipakai untuk layout bersama. Route groups seperti `(store)` atau `(admin)` boleh digunakan untuk mengelompokkan layout tanpa menambahkan segmen URL.
 
-## 5.5 Keranjang Belanja
-
-Customer dapat menambahkan produk ke keranjang, mengubah jumlah barang, menghapus barang, serta melihat total harga sebelum melanjutkan ke proses checkout.
-
----
-
-## 5.6 Checkout & Pemesanan
-
-Customer dapat melakukan checkout terhadap produk yang terdapat di keranjang. Customer dapat menentukan alamat, lokasi toko, metode pengambilan, dan catatan pesanan.
-
-Terdapat dua metode pengambilan:
-
-* **Pesan antar** — pesanan dikirim ke alamat customer.
-* **Ambil di toko** — customer mengambil pesanan secara langsung pada lokasi toko yang dipilih.
-
----
-
-## 5.7 Manajemen Alamat
-
-Customer dapat menyimpan dan mengelola beberapa alamat yang digunakan untuk proses pemesanan dan pengiriman.
-
----
-
-## 5.8 Pembayaran
-
-Sistem mencatat pembayaran berdasarkan pesanan customer dengan metode:
-
-* QRIS
-* Transfer
-* COD
-
-Setiap pembayaran memiliki status:
-
-* Pending
-* Berhasil
-* Gagal
-* Expired
-
-Data transaksi pembayaran dikaitkan dengan pesanan.
-
----
-
-## 5.9 Status & Riwayat Pesanan
-
-Customer dapat melihat perkembangan pesanan berdasarkan status:
-
-* Pending
-* Diproses
-* Siap Diambil
-* Dikirim
-* Selesai
-* Dibatalkan
-
-Customer juga dapat melihat daftar pesanan yang pernah dilakukan.
-
----
-
-## 5.10 Manajemen Produk & Stok
-
-Admin dapat menambah, mengubah, melihat, dan menghapus produk. Admin juga dapat mengelola jumlah stok serta status ketersediaan produk.
-
-Data produk meliputi kode item, barcode, SKU, nama produk, kategori, merek, stok, rak, tipe item, harga beli, harga jual, keterangan, foto, dan status.
-
----
-
-## 5.11 Manajemen Pesanan
-
-Admin dapat melihat dan mengelola pesanan yang masuk. Admin dapat memperbarui status pesanan sesuai dengan proses pemenuhan pesanan.
-
-Pesanan juga membedakan antara metode **pesan antar** dan **ambil di toko**.
-
----
-
-## 5.12 Dashboard Admin
-
-Dashboard menyediakan ringkasan informasi toko untuk membantu admin memantau aktivitas sistem.
-
-Informasi yang dapat ditampilkan antara lain:
-
-* Jumlah produk
-* Jumlah stok
-* Jumlah pesanan
-* Pesanan baru
-* Pesanan selesai
-* Total penjualan
-* Ringkasan penjualan
-* Produk dengan stok rendah
-
----
-
-## 5.13 Rekap Penjualan
-
-Admin dapat melihat rekap penjualan berdasarkan data transaksi yang telah selesai. Data dapat digunakan untuk mengetahui jumlah transaksi dan nilai penjualan dalam periode tertentu.
-
----
-
-## 5.14 Lokasi Toko
-
-Admin dapat mengelola lokasi cabang toko yang ditampilkan pada halaman About Us. Setiap lokasi dapat menyimpan nama toko, koordinat latitude dan longitude, serta deskripsi.
-
-Fitur ini digunakan untuk menampilkan informasi lokasi toko kepada customer dan mendukung pilihan lokasi saat customer memilih metode ambil di toko.
-
----
-
-## 5.15 Ulasan Toko
-
-Customer dapat memberikan ulasan terhadap pelayanan toko secara keseluruhan melalui rating dan komentar. Ulasan tidak diberikan untuk masing-masing produk.
-
----
-
-## 5.16 Notifikasi Pesanan
-
-Sistem memberikan notifikasi kepada admin ketika terdapat pesanan baru yang masuk. Notifikasi memiliki informasi judul, pesan, pesanan terkait, serta status sudah atau belum dibaca.
-
----
-
-## 5.17 Import & Export Data Produk dan Penjualan
-
-Admin dapat melakukan import data produk menggunakan file Excel sehingga data produk dalam jumlah banyak dapat dimasukkan secara sekaligus tanpa harus menambahkan produk satu per satu.
-
-Admin juga dapat melakukan export data produk dan data penjualan untuk kebutuhan pengelolaan, pelaporan, dan pengolahan data lebih lanjut.
-
----
-
-# 6. Alur Customer
+Struktur awal yang disarankan:
 
 ```text
-Registrasi / Login
-        ↓
-Halaman Utama
-        ↓
-Katalog Produk
-        ↓
-Cari / Filter Produk
-        ↓
-Pilih Produk
-        ↓
-Tambah ke Keranjang
-        ↓
-Keranjang
-        ↓
-Checkout
-        ↓
-Pilih Alamat
-        ↓
-Pilih Metode
- ┌───────────────┐
- │               │
-Dikirim      Ambil di Toko
- │               │
-Alamat        Lokasi Toko
- │               │
- └───────┬───────┘
-         ↓
-     Pembayaran
-         ↓
-    Pesanan Diproses
-         ↓
-   Dikirim / Siap Diambil
-         ↓
-       Selesai
-         ↓
-     Ulasan Toko
+app/
+  (store)/
+    page.tsx
+    produk/
+      page.tsx
+      [id]/
+        page.tsx
+    kategori/
+      [id]/
+        page.tsx
+    keranjang/
+      page.tsx
+    checkout/
+      page.tsx
+    pesanan/
+      page.tsx
+      [id]/
+        page.tsx
+    akun/
+      masuk/
+        page.tsx
+      daftar/
+        page.tsx
+      lupa-kata-sandi/
+        page.tsx
+      reset-kata-sandi/
+        page.tsx
+      profil/
+        page.tsx
+      alamat/
+        page.tsx
+  (admin)/
+    admin/
+      page.tsx
+      pesanan/
+        page.tsx
+      penjualan/
+        page.tsx
+      notifikasi/
+        page.tsx
+      produk/
+        page.tsx
+      kategori/
+        page.tsx
+      lokasi/
+        page.tsx
+      pengguna/
+        page.tsx
+      import-produk/
+        page.tsx
+```
+
+Daftar ini merupakan rancangan route UI, bukan route yang sudah ada di backend. Halaman admin hanya ditampilkan sesuai role; backend tetap menjadi otoritas final untuk validasi token dan izin akses.
+
+### 5.2 Integrasi API
+
+* Base URL backend diatur melalui environment variable frontend; jangan menanam URL server di banyak komponen.
+* Request ke endpoint terproteksi mengirim token akses Sanctum melalui header `Authorization` dan menangani respons 401/403 dengan benar.
+* Pertahankan pemisahan komponen tampilan dengan modul/helper integrasi API agar format respons, error validasi, dan pengiriman token konsisten.
+* Untuk endpoint unduh/unggah, tangani file binary atau multipart sesuai respons endpoint, bukan sebagai JSON biasa.
+* Halaman menampilkan state loading, kosong, berhasil, dan error. Pesan validasi backend ditampilkan pada field/form yang relevan.
+* Token dan data sesi harus disimpan serta digunakan dengan cara yang tidak mengekspos kredensial kepada pihak yang tidak berwenang.
+
+---
+
+## 6. Fitur dan Perilaku Sistem
+
+### 6.1 Autentikasi, Akun, dan Profil
+
+API menyediakan registrasi, login, logout, login Google OAuth, pengambilan/pembaruan profil, pembaruan kata sandi, serta alur lupa dan reset kata sandi. Login menerima nama atau email beserta kata sandi. Akun hasil registrasi publik berperan sebagai customer.
+
+Frontend menyediakan halaman daftar, masuk, lupa/reset kata sandi, callback/kelanjutan login Google, profil, dan ubah kata sandi. Semua halaman terproteksi harus menangani token tidak valid atau kedaluwarsa tanpa menampilkan data privat.
+
+### 6.2 Halaman Utama dan Katalog
+
+Customer dapat melihat katalog produk, detail produk, kategori, dan daftar produk suatu kategori. Data produk dapat berisi kategori, kode item, barcode, SKU, nama, merek, stok, rak, tipe item, harga beli/jual, keterangan, foto, serta status tersedia/tidak tersedia. UI customer hanya menampilkan informasi yang sesuai untuk pembeli dan tidak membocorkan data internal seperti harga beli.
+
+**Batasan API saat ini:** endpoint katalog memerlukan autentikasi dan memakai pagination (20 item per halaman). Endpoint produk/kategori belum menyediakan pencarian nama atau filter katalog umum. Kebutuhan pencarian dan filter di UI memerlukan dukungan query API sebelum dapat digunakan secara konsisten pada keseluruhan katalog; jangan hanya memfilter item pada halaman pagination yang sedang terbuka.
+
+### 6.3 Kategori dan Lokasi Toko
+
+Customer dapat melihat kategori dan lokasi toko. Lokasi berisi nama, koordinat, deskripsi, serta biaya pengiriman. Super admin dapat membuat, memperbarui, dan menghapus kategori/lokasi. Lokasi yang dihapus secara lunak tidak boleh ditawarkan sebagai pilihan checkout.
+
+### 6.4 Keranjang Belanja
+
+Customer dapat melihat keranjang, menambah barang, mengubah jumlah, menghapus barang, dan mengosongkan keranjang. Harga pada keranjang ditampilkan sebagai informasi sebelum checkout; backend menghitung ulang nilai pesanan dari harga produk saat pesanan dibuat.
+
+### 6.5 Alamat
+
+Customer dapat membuat, melihat, mengubah, dan menghapus beberapa alamat. Data alamat terdiri dari nama alamat, nama penerima, nomor telepon, dan alamat lengkap. Alamat harus dipilih untuk metode pesan antar; metode ambil di toko tidak memerlukan alamat pengiriman.
+
+### 6.6 Checkout dan Pesanan
+
+Pesanan dibuat dari isi keranjang yang tidak kosong. Customer wajib memilih lokasi toko dan metode `pesan_antar` atau `ambil_ditoko`; metode pesan antar juga wajib memiliki alamat milik customer. Biaya pengiriman dihitung dari biaya lokasi yang dipilih untuk pesan antar dan bernilai nol untuk ambil di toko.
+
+Backend memvalidasi ketersediaan dan stok dalam proses checkout, menyimpan detail harga/nama barang pada item pesanan, mengurangi stok, lalu mengosongkan keranjang setelah pesanan berhasil dibuat. Customer dapat melihat daftar/detail pesanan miliknya. Pembatalan oleh customer hanya diperbolehkan saat status masih `pending` atau `diproses`; stok dikembalikan ketika pesanan dibatalkan.
+
+### 6.7 Pembayaran
+
+Customer dapat membuat satu catatan pembayaran untuk satu pesanan dengan metode `QRIS`, `Transfer`, atau `COD`. Data pembayaran mencakup jumlah, ID transaksi, tanggal, dan status. Status pembayaran yang didukung: `pending`, `berhasil`, `gagal`, dan `expired`.
+
+API menyediakan pencatatan pembayaran dan pembaruan status oleh admin/super admin. Integrasi payment gateway atau konfirmasi otomatis pembayaran tidak termasuk kemampuan yang terverifikasi di backend saat ini; status pada frontend harus mengikuti data backend, bukan menganggap transaksi berhasil hanya karena customer memilih metode.
+
+### 6.8 Status dan Riwayat Pesanan
+
+Status yang didukung backend:
+
+| Status | Keterangan |
+| --- | --- |
+| `pending` | Pesanan baru dibuat |
+| `diproses` | Pesanan sedang disiapkan |
+| `dikirim` | Pesanan berstatus dalam proses pengantaran/pemenuhan berikutnya |
+| `selesai` | Pesanan selesai |
+| `dibatalkan` | Pesanan dibatalkan |
+
+Transisi status oleh admin adalah `pending` ke `diproses` atau `dibatalkan`, `diproses` ke `dikirim` atau `dibatalkan`, dan `dikirim` ke `selesai`. Status `selesai` dan `dibatalkan` bersifat final. Backend belum memiliki status khusus `siap_diambil`; UI tidak boleh mengirim status tersebut. Untuk pesanan ambil di toko, tampilkan metode dan instruksi pengambilan tanpa mengarang status backend baru.
+
+### 6.9 Pengelolaan Produk dan Stok
+
+Super admin dapat melihat, menambah, mengubah, dan menghapus produk beserta kategori dan atribut barang. Admin cabang tidak memiliki endpoint CRUD produk khusus. Stok berubah ketika checkout berhasil dan dipulihkan ketika pesanan dibatalkan; perubahan stok manual dapat dilakukan melalui pembaruan produk yang diizinkan untuk super admin.
+
+### 6.10 Dashboard
+
+Dashboard tersedia untuk super admin. Ringkasan backend mencakup jumlah produk, kategori, pengguna, admin, customer, total pesanan, jumlah pesanan per status, total nilai pesanan berstatus selesai termasuk biaya pengiriman, jumlah produk dengan stok `<= 3`, dan jumlah produk berstatus tidak tersedia.
+
+Tidak semua angka tersebut merupakan jumlah stok agregat; frontend harus menggunakan nama/arti field dari respons API dan tidak menafsirkannya sebagai total unit stok.
+
+### 6.11 Laporan Penjualan
+
+Admin cabang dan super admin dapat melihat daftar/detail transaksi selesai serta ringkasan penjualan. Daftar dapat difilter menurut tanggal mulai dan tanggal selesai, dipaginasi 20 item, dan untuk admin cabang dibatasi ke lokasi akun. Ringkasan menyediakan total transaksi, nilai penjualan, biaya pengiriman, dan total pendapatan.
+
+**Batasan API saat ini:** laporan penjualan tersedia untuk dibaca sebagai JSON; endpoint export penjualan belum tersedia. Fitur export penjualan pada frontend memerlukan endpoint backend baru.
+
+### 6.12 Ulasan Toko
+
+Customer dapat membuat, melihat, memperbarui, dan menghapus ulasan toko yang berisi rating dan komentar opsional. Satu akun hanya dapat memiliki satu ulasan aktif. Ulasan merupakan ulasan toko, bukan ulasan produk.
+
+### 6.13 Notifikasi
+
+API menyediakan daftar/detail notifikasi per pengguna, menandai satu atau semua notifikasi sebagai dibaca, dan menghapus notifikasi. Notifikasi menyimpan judul, pesan, referensi pesanan, dan waktu dibaca. Frontend hanya menampilkan notifikasi milik pengguna yang sedang masuk.
+
+### 6.14 Import dan Export Produk
+
+Fitur data produk tersedia untuk super admin:
+
+* Mengunduh template import.
+* Mengunggah berkas `.xlsx`, `.xls`, atau `.csv` dengan ukuran maksimum 10 MB.
+* Meninjau validasi dan perubahan sebelum konfirmasi import.
+* Mengonfirmasi sinkronisasi menggunakan hash pratinjau yang diberikan API.
+* Mengunduh export produk dalam format `.xlsx`.
+
+Import dapat membuat/memperbarui produk berdasarkan kode item dan menyinkronkan nilai stok dari file. Sel kosong pada kolom opsional dapat mengosongkan nilai yang tersimpan; UI harus menjelaskan dampak tersebut sebelum konfirmasi. Bila data berubah setelah pratinjau, frontend meminta pengguna membuat pratinjau baru.
+
+---
+
+## 7. Alur Pengguna
+
+### 7.1 Customer
+
+```text
+Daftar / Masuk / Login Google
+            ↓
+Beranda → Katalog → Detail Produk
+                         ↓
+                      Keranjang
+                         ↓
+                       Checkout
+                         ↓
+            Pilih lokasi dan metode
+                 ┌───────┴────────┐
+             Pesan antar       Ambil di toko
+                 ↓                  ↓
+          Pilih alamat       Konfirmasi lokasi
+                 └───────┬────────┘
+                         ↓
+                 Buat pesanan
+                         ↓
+              Catat pembayaran
+                         ↓
+            Pantau status pesanan
+                         ↓
+                Selesai → Ulasan
+```
+
+### 7.2 Admin Cabang
+
+```text
+Masuk → Pesanan cabang → Detail pesanan → Perbarui status
+      → Pembayaran → Perbarui status pembayaran
+      → Penjualan → Filter tanggal / ringkasan
+      → Notifikasi
+```
+
+### 7.3 Super Admin
+
+```text
+Masuk → Dashboard
+      → Produk / Kategori / Lokasi
+      → Pesanan / Pembayaran / Penjualan
+      → Pengguna dan role
+      → Template / Pratinjau / Konfirmasi import / Export produk
 ```
 
 ---
 
-# 7. Alur Admin
+## 8. Route Frontend yang Dibutuhkan
 
-```text
-Login Admin
-     ↓
-Dashboard
-     ↓
- ┌───┼────────┬──────────┐
- ↓   ↓        ↓          ↓
-Produk Stok  Pesanan  Penjualan
- ↓   ↓        ↓          ↓
-Import       Kelola    Rekap
-Export       Status
-     ↓
-Lokasi Toko
-     ↓
-Notifikasi Pesanan
-```
-
----
-
-# 8. Data Utama Sistem
-
-Database utama yang digunakan dalam sistem meliputi:
-
-| Tabel          | Fungsi                                  |
-| -------------- | --------------------------------------- |
-| users          | Menyimpan data customer dan admin       |
-| kategori       | Menyimpan kategori produk               |
-| barang         | Menyimpan data produk                   |
-| lokasi         | Menyimpan lokasi toko                   |
-| alamat         | Menyimpan alamat customer               |
-| keranjang      | Menyimpan keranjang customer            |
-| keranjang_item | Menyimpan produk dalam keranjang        |
-| pesanan        | Menyimpan data transaksi pemesanan      |
-| pesanan_item   | Menyimpan detail produk dalam pesanan   |
-| pembayaran     | Menyimpan data pembayaran               |
-| ulasan         | Menyimpan ulasan customer terhadap toko |
-| notifikasi     | Menyimpan notifikasi pesanan            |
+| Route UI Next.js | Tujuan |
+| --- | --- |
+| `/` | Beranda |
+| `/produk` | Katalog produk |
+| `/produk/[id]` | Detail produk |
+| `/kategori/[id]` | Produk per kategori |
+| `/keranjang` | Keranjang customer |
+| `/checkout` | Pilihan lokasi, metode, dan alamat |
+| `/pesanan` | Riwayat customer |
+| `/pesanan/[id]` | Detail/status pesanan |
+| `/akun/masuk` | Login |
+| `/akun/daftar` | Registrasi |
+| `/akun/lupa-kata-sandi` | Meminta reset kata sandi |
+| `/akun/reset-kata-sandi` | Reset kata sandi |
+| `/akun/profil` | Profil dan kata sandi |
+| `/akun/alamat` | Daftar dan pengelolaan alamat |
+| `/admin` | Dashboard super admin |
+| `/admin/pesanan` | Pesanan yang sesuai cakupan role |
+| `/admin/penjualan` | Laporan penjualan |
+| `/admin/notifikasi` | Notifikasi |
+| `/admin/produk` | Pengelolaan produk super admin |
+| `/admin/kategori` | Pengelolaan kategori super admin |
+| `/admin/lokasi` | Pengelolaan lokasi super admin |
+| `/admin/pengguna` | Pengelolaan pengguna/role super admin |
+| `/admin/import-produk` | Pratinjau, konfirmasi import, dan export produk |
 
 ---
 
-# 9. Status Pesanan
+## 9. Data Utama
 
-| Status       | Deskripsi                               |
-| ------------ | --------------------------------------- |
-| Pending      | Pesanan baru dibuat dan menunggu proses |
-| Diproses     | Pesanan sedang disiapkan oleh toko      |
-| Siap Diambil | Pesanan siap diambil customer           |
-| Dikirim      | Pesanan sedang dalam proses pengiriman  |
-| Selesai      | Pesanan telah selesai                   |
-| Dibatalkan   | Pesanan dibatalkan                      |
+| Tabel | Fungsi |
+| --- | --- |
+| `users` | Akun, role, lokasi admin, dan informasi profil |
+| `kategori` | Kategori produk |
+| `barang` | Data produk dan stok |
+| `lokasi` | Cabang toko, koordinat, dan biaya pengiriman |
+| `alamat` | Alamat customer |
+| `keranjang` | Keranjang milik pengguna |
+| `keranjang_item` | Produk dan jumlah pada keranjang |
+| `pesanan` | Transaksi pesanan, metode, lokasi, dan status |
+| `pesanan_item` | Salinan nama/harga serta jumlah produk dalam pesanan |
+| `pembayaran` | Metode, jumlah, ID transaksi, dan status pembayaran |
+| `ulasan` | Rating dan komentar toko dari pengguna |
+| `notifikasi` | Notifikasi milik pengguna yang terhubung ke pesanan |
+| `personal_access_tokens` | Token API Sanctum |
 
 ---
 
-# 10. Non-Functional Requirements
+## 10. Kebutuhan Non-Fungsional
 
-### Performance
+### Performa
 
-* Halaman katalog harus dapat menampilkan produk dengan waktu respons yang wajar.
-* Query produk, pesanan, dan transaksi perlu menggunakan pagination untuk data dalam jumlah besar.
-* Sistem harus menghindari pengambilan seluruh data sekaligus ketika jumlah data meningkat.
+* Gunakan pagination API yang tersedia; endpoint daftar utama mengembalikan maksimum 20 data per halaman.
+* Tampilkan kontrol pagination dan state loading/empty yang jelas.
+* Jangan menganggap filter lokal pada satu halaman sebagai pencarian seluruh katalog.
 
-### Security
+### Keamanan dan Akses
 
-* Password pengguna harus disimpan dalam bentuk hash.
-* Endpoint yang membutuhkan autentikasi harus dilindungi Laravel Sanctum.
-* Hak akses admin dan customer harus dibatasi berdasarkan role.
-* Validasi input harus dilakukan pada request yang diterima server.
-
-### Scalability
-
-* Struktur database menggunakan relasi antar tabel agar data dapat dikembangkan.
-* Produk, kategori, pesanan, dan transaksi dipisahkan ke dalam tabel masing-masing.
-* Sistem mendukung penambahan lokasi toko baru tanpa mengubah struktur database.
-* Import data memungkinkan penambahan produk dalam jumlah besar.
+* Gunakan HTTPS pada deployment.
+* Kirim token Sanctum hanya untuk API terproteksi dan jangan mengeksposnya di URL atau log.
+* Validasi akses role di backend tetap wajib; menyembunyikan menu frontend bukan pengganti otorisasi API.
+* Jangan menampilkan data internal produk seperti harga beli kepada customer.
+* Data pesanan, alamat, pembayaran, dan notifikasi hanya boleh ditampilkan kepada pemilik atau role yang berwenang.
 
 ### Maintainability
 
-* Backend menggunakan struktur Laravel Model, Migration, Factory, Seeder, Controller, Request, dan Resource.
-* Relasi antar model menggunakan Eloquent.
-* Validasi data dipisahkan dari logic controller menggunakan Form Request jika diperlukan.
+* Gunakan App Router dan struktur folder `app/` sebagai sumber routing halaman Next.js.
+* Pisahkan layout storefront dan admin, serta gunakan komponen bersama untuk form, tabel, pagination, pesan error, dan status.
+* Jaga kontrak nama field/status backend; normalisasi hanya untuk tampilan, jangan mengirim nilai enum buatan frontend.
+* Dokumentasikan variabel environment frontend untuk base URL API tanpa memasukkan secret ke repository.
 
 ---
 
-# 11. MVP
+## 11. Cakupan Implementasi dan Kesenjangan
 
-Versi awal sistem diprioritaskan pada fitur berikut:
+### Sudah didukung backend
 
-1. Autentikasi & Role-Based Access
-2. Katalog Produk
-3. Kategori Produk
-4. Pencarian & Filter Produk
-5. Keranjang Belanja
-6. Checkout & Pemesanan
-7. Manajemen Alamat
-8. Pembayaran
-9. Status & Riwayat Pesanan
-10. Manajemen Produk & Stok
-11. Manajemen Pesanan
-12. Dashboard Admin
-13. Rekap Penjualan
-14. Lokasi Toko
-15. Ulasan Toko
-16. Notifikasi Pesanan
-17. Import & Export Data Produk dan Penjualan
+Autentikasi dan profil, katalog/kategori/lokasi terproteksi, keranjang, alamat, checkout dan pembatalan, pencatatan pembayaran, status/riwayat pesanan, role admin dan super admin, pengelolaan produk/kategori/lokasi, dashboard, laporan penjualan JSON, ulasan toko, manajemen notifikasi, serta import pratinjau/konfirmasi dan export produk.
+
+### Perlu direncanakan atau dikembangkan
+
+1. Frontend Next.js dengan App Router dan seluruh route UI pada bagian 8.
+2. Pencarian nama dan filter produk melalui parameter API agar mencakup seluruh katalog.
+3. Endpoint export laporan penjualan bila fitur unduh laporan dibutuhkan.
+4. Status khusus pemenuhan ambil di toko bila bisnis memerlukan status “siap diambil”; backend saat ini belum mendukungnya.
+5. Integrasi payment gateway/konfirmasi otomatis bila diperlukan; backend saat ini hanya mencatat metode dan status pembayaran.
+6. Pastikan proses pembentukan/pengiriman notifikasi pesanan terhubung dengan alur pesanan bila notifikasi otomatis diperlukan.
 
 ---
 
-# 12. Indikator Keberhasilan
+## 12. Kriteria Penerimaan Frontend
 
-Sistem dianggap memenuhi kebutuhan utama apabila:
-
-* Customer dapat membuat akun dan login.
-* Customer dapat melihat dan mencari produk.
-* Customer dapat menambahkan produk ke keranjang.
-* Customer dapat melakukan checkout.
-* Customer dapat memilih pesan antar atau ambil di toko.
-* Sistem dapat mencatat pembayaran.
-* Customer dapat melihat status dan riwayat pesanan.
-* Admin dapat mengelola produk dan stok.
-* Admin dapat mengelola pesanan.
-* Admin dapat melihat rekap penjualan.
-* Admin dapat menambahkan lokasi toko.
-* Customer dapat memberikan ulasan toko.
-* Admin menerima notifikasi ketika terdapat pesanan baru.
-* Admin dapat melakukan import produk melalui Excel.
-* Admin dapat melakukan export data produk dan penjualan.
+* Route halaman mengikuti struktur folder Next.js App Router.
+* Customer dapat masuk/daftar, melihat katalog terproteksi, mengelola keranjang/alamat, checkout dengan metode yang valid, dan melihat pesanan miliknya.
+* Checkout menampilkan biaya pengiriman sesuai lokasi, memvalidasi pilihan alamat, dan menangani keranjang kosong atau stok tidak cukup.
+* UI hanya mengirim nilai metode/status yang didukung API dan menampilkan status pesanan aktual.
+* Admin cabang hanya melihat data yang diberikan backend untuk lokasinya; super admin mendapatkan halaman pengelolaan yang sesuai.
+* Form pembayaran tidak menampilkan keberhasilan transaksi sebelum status API menyatakan `berhasil`.
+* Import produk memiliki pratinjau dan konfirmasi eksplisit serta memberi peringatan bahwa kolom opsional kosong dapat menghapus nilai lama.
+* Setiap halaman menangani kondisi belum login, tidak berizin, data kosong, loading, dan error API.
+* Kebutuhan pencarian seluruh katalog dan export penjualan tidak dinyatakan selesai sampai endpoint pendukung tersedia.

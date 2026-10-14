@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\User;
 
@@ -14,6 +15,36 @@ test('an authenticated user can list categories with pagination metadata', funct
         ->assertJsonPath('data.0.nama_kategori', 'sayuran')
         ->assertJsonPath('meta.per_page', 20)
         ->assertJsonStructure(['links', 'meta']);
+});
+
+test('a guest can browse categories and their customer-safe products', function () {
+    $kategori = Kategori::factory()->create(['nama_kategori' => 'sayuran']);
+    $barang = Barang::factory()->create([
+        'kategori_id' => $kategori->id,
+        'HargaBeli' => 1200,
+        'HargaJual' => 2500,
+    ]);
+
+    $this->getJson('/api/kategori')
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $kategori->id)
+        ->assertJsonPath('meta.per_page', 20);
+
+    $this->getJson("/api/kategori/{$kategori->id}")
+        ->assertOk()
+        ->assertJsonPath('data.nama_kategori', 'sayuran');
+
+    $this->getJson("/api/kategori/{$kategori->id}/barang")
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $barang->id)
+        ->assertJsonPath('data.0.HargaJual', '2500.00')
+        ->assertJsonMissingPath('data.0.HargaBeli')
+        ->assertJsonPath('meta.per_page', 20);
+
+    $this->actingAs(User::factory()->create(['role' => 'superAdmin']), 'sanctum')
+        ->getJson("/api/kategori/{$kategori->id}/barang")
+        ->assertOk()
+        ->assertJsonPath('data.0.HargaBeli', '1200.00');
 });
 
 test('only a super admin can create a category', function () {
