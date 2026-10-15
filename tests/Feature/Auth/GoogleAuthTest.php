@@ -29,16 +29,22 @@ test('a verified google account can sign in and is linked to its user record', f
 
     Socialite::shouldReceive('driver')->once()->with('google')->andReturn($provider);
 
-    $this->getJson('/api/auth/google/callback')
-        ->assertOk()
-        ->assertJsonPath('success', true)
-        ->assertJsonPath('data.user.email', 'google@example.com')
-        ->assertJsonStructure(['data' => ['user' => ['id'], 'token']]);
+    $response = $this->get('/api/auth/google/callback');
+    $response->assertRedirect();
+
+    $redirectUrl = $response->headers->get('Location');
+
+    expect($redirectUrl)
+        ->toBe('http://localhost:3000/store/akun/google/callback?status=success');
 
     $user = User::where('email', 'google@example.com')->firstOrFail();
 
     expect($user->google_id)->toBe('google-user-123')
         ->and($user->email_verified_at)->not->toBeNull();
+    $this->withHeader('Origin', 'http://localhost:3000')
+        ->getJson('/api/profile')
+        ->assertOk()
+        ->assertJsonPath('data.email', 'google@example.com');
 });
 
 test('an unverified google account cannot sign in', function () {

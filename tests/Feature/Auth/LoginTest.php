@@ -39,6 +39,29 @@ test('a user can log in with their name and cannot log in with an incorrect pass
         ->assertJsonValidationErrors('login');
 });
 
+test('a browser login uses the session cookie and does not return an api token', function () {
+    $user = User::factory()->create([
+        'email' => 'cookie-login@example.com',
+        'password' => Hash::make('correct-password'),
+    ]);
+
+    $response = $this->withHeader('Origin', 'http://localhost:3000')
+        ->postJson('/api/login', [
+            'login' => 'cookie-login@example.com',
+            'password' => 'correct-password',
+        ]);
+
+    $response->assertOk()
+        ->assertJsonPath('data.user.id', $user->id)
+        ->assertJsonMissingPath('data.token')
+        ->assertCookie(config('session.cookie'));
+
+    $this->withHeader('Origin', 'http://localhost:3000')
+        ->getJson('/api/profile')
+        ->assertOk()
+        ->assertJsonPath('data.email', 'cookie-login@example.com');
+});
+
 test('login requires both credentials', function () {
     $this->postJson('/api/login', [])
         ->assertUnprocessable()

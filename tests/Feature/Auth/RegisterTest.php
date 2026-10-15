@@ -39,3 +39,25 @@ test('registration requires a valid unique email and matching password confirmat
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['email', 'password']);
 });
+
+test('a browser registration uses the session cookie and does not return an api token', function () {
+    Notification::fake();
+
+    $response = $this->withHeader('Origin', 'http://localhost:3000')
+        ->postJson('/api/register', [
+            'name' => 'Cookie Customer',
+            'email' => 'cookie-customer@example.com',
+            'password' => 'SecurePassword123!',
+            'password_confirmation' => 'SecurePassword123!',
+        ]);
+
+    $response->assertOk()
+        ->assertJsonPath('data.user.email', 'cookie-customer@example.com')
+        ->assertJsonMissingPath('data.token')
+        ->assertCookie(config('session.cookie'));
+
+    $this->withHeader('Origin', 'http://localhost:3000')
+        ->getJson('/api/profile')
+        ->assertOk()
+        ->assertJsonPath('data.email', 'cookie-customer@example.com');
+});

@@ -31,7 +31,6 @@ Route::post('/reset-password', [PasswordController::class, 'reset'])
     ->middleware('throttle:5,1');
 
 Route::get('/auth/google', [AuthController::class, 'redirectGoogle']);
-Route::get('/auth/google/callback', [AuthController::class, 'callbackGoogle']);
 
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/kategori/{id}', [KategoriController::class, 'show'])

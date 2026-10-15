@@ -21,11 +21,11 @@ class KategoriFactory extends Factory
             'nama_kategori' => fake()->randomElement([
                 'sayuran',
                 'buah',
-                'bumbu_dapur',
-                'bahan_pokok',
+                'bumbu dapur',
+                'bahan pokok',
                 'hewani',
-                'makanan_minuman',
-                'frozen_food',
+                'makanan minuman',
+                'frozen food',
                 'lainnya',
             ]),
         ];

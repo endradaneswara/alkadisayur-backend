@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/api/auth/google/callback', [AuthController::class, 'callbackGoogle'])
+    ->name('auth.google.callback');
 
 Route::inertia('/', 'welcome')->name('home');
 
