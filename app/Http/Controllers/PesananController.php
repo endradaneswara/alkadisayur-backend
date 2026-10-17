@@ -73,8 +73,15 @@ class PesananController extends Controller
     {
         $user = $request->user();
 
+        $filters = $request->validate([
+            'status' => ['sometimes', 'nullable', 'string', 'in:pending,diproses,dikirim,selesai,dibatalkan'],
+            'lokasi_id' => ['sometimes', 'nullable', 'integer', 'exists:lokasi,id'],
+            'search' => ['sometimes', 'nullable', 'string'],
+        ]);
+
         $pesanan = $this->pesananService->adminIndex(
-            $user
+            $user,
+            $filters
         );
 
         return $this->success(

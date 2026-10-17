@@ -92,7 +92,7 @@ class PesananService
                 if ($barang->Status !== 'tersedia') {
                     throw ValidationException::withMessages([
                         'barang' => [
-                            "Barang {$barang->NamaItem} sudah tidak tersedia.",
+                            "Barang {$barang->NamaItem} tidak tersedia.",
                         ],
                     ]);
                 }
@@ -203,7 +203,7 @@ class PesananService
         });
     }
 
-    public function adminIndex(User $user): LengthAwarePaginator
+    public function adminIndex(User $user, array $filters = []): LengthAwarePaginator
     {
         $query = Pesanan::with([
             'user',
@@ -220,6 +220,23 @@ class PesananService
             } else {
                 $query->where('lokasi_toko_id', $user->lokasi_id);
             }
+        } elseif ($user->role === 'superAdmin' && ! empty($filters['lokasi_id'])) {
+            $query->where('lokasi_toko_id', $filters['lokasi_id']);
+        }
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_order', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
         }
 
         return $query->paginate(20);

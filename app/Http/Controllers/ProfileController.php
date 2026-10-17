@@ -12,18 +12,22 @@ class ProfileController extends Controller
 
     public function show(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->loadMissing('lokasi');
+
+        $data = $user->only([
+            'id',
+            'name',
+            'email',
+            'no_hp',
+            'avatar',
+            'role',
+            'email_verified_at',
+            'lokasi_id',
+        ]);
+        $data['lokasi'] = $user->lokasi;
 
         return $this->success(
-            $user->only([
-                'id',
-                'name',
-                'email',
-                'no_hp',
-                'avatar',
-                'role',
-                'email_verified_at',
-            ]),
+            $data,
             'Data profile berhasil diambil.'
         );
     }

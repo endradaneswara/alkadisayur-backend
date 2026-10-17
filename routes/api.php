@@ -89,6 +89,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::middleware('role:admin|superAdmin')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index']);
+
         Route::get('/admin/pesanan', [PesananController::class, 'adminIndex']);
         Route::get('/admin/pesanan/{id}', [PesananController::class, 'adminShow'])
             ->whereNumber('id');
@@ -114,8 +116,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::middleware('role:superAdmin')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index']);
-
         Route::apiResource('kategori', KategoriController::class)
             ->only(['store', 'update', 'destroy']);
 

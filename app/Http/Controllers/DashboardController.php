@@ -16,7 +16,19 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $dashboard = $this->dashboardService->index();
+        $validated = request()->validate([
+            'rentang' => ['sometimes', 'string', 'in:1h,7h,30h'],
+            'lokasi_id' => ['sometimes', 'nullable', 'integer', 'exists:lokasi,id'],
+        ]);
+
+        $rentang = $validated['rentang'] ?? '7h';
+        $lokasiId = isset($validated['lokasi_id']) ? (int) $validated['lokasi_id'] : null;
+
+        $dashboard = $this->dashboardService->index(
+            request()->user(),
+            $rentang,
+            $lokasiId
+        );
 
         return $this->success(
             new DashboardResource($dashboard),

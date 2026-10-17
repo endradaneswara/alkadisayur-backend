@@ -26,6 +26,7 @@ class PenjualanController extends Controller
         $filters = $request->validate([
             'tanggal_mulai' => ['sometimes', 'nullable', 'date'],
             'tanggal_selesai' => $endDateRules,
+            'lokasi_id' => ['sometimes', 'nullable', 'integer', 'exists:lokasi,id'],
         ]);
 
         $penjualan = $this->penjualanService->index(
@@ -54,8 +55,20 @@ class PenjualanController extends Controller
 
     public function summary(Request $request)
     {
+        $endDateRules = ['sometimes', 'nullable', 'date'];
+
+        if ($request->filled('tanggal_mulai')) {
+            $endDateRules[] = 'after_or_equal:tanggal_mulai';
+        }
+
+        $filters = $request->validate([
+            'tanggal_mulai' => ['sometimes', 'nullable', 'date'],
+            'tanggal_selesai' => $endDateRules,
+            'lokasi_id' => ['sometimes', 'nullable', 'integer', 'exists:lokasi,id'],
+        ]);
+
         return $this->success(
-            $this->penjualanService->summary($request->user()),
+            $this->penjualanService->summary($request->user(), $filters),
             'Ringkasan penjualan berhasil diambil.'
         );
     }

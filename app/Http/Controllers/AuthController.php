@@ -143,8 +143,9 @@ class AuthController extends Controller
         if ($request->hasSession()) {
             Auth::guard('web')->login($user);
             $request->session()->regenerate();
-            $data = [
-                'user' => $user->only([
+            $user->loadMissing('lokasi');
+            $userData = array_merge(
+                $user->only([
                     'id',
                     'name',
                     'email',
@@ -152,11 +153,18 @@ class AuthController extends Controller
                     'no_hp',
                     'avatar',
                     'email_verified_at',
+                    'lokasi_id',
                 ]),
+                ['lokasi' => $user->lokasi]
+            );
+
+            $data = [
+                'user' => $userData,
             ];
         } else {
-            $data = [
-                'user' => $user->only([
+            $user->loadMissing('lokasi');
+            $userData = array_merge(
+                $user->only([
                     'id',
                     'name',
                     'email',
@@ -164,7 +172,13 @@ class AuthController extends Controller
                     'no_hp',
                     'avatar',
                     'email_verified_at',
+                    'lokasi_id',
                 ]),
+                ['lokasi' => $user->lokasi]
+            );
+
+            $data = [
+                'user' => $userData,
                 'token' => $user->createToken('api-token')->plainTextToken,
             ];
         }

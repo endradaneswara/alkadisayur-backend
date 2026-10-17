@@ -21,6 +21,7 @@ class BarangCustomerResource extends JsonResource
             'NamaItem' => $this->NamaItem,
             'Merek' => $this->Merek,
             'TipeItem' => $this->TipeItem,
+            'Stok' => $this->Stok,
             'HargaJual' => $this->HargaJual,
             'Keterangan' => $this->Keterangan,
             'Foto' => $this->Foto,

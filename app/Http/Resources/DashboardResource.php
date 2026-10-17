@@ -37,6 +37,18 @@ class DashboardResource extends JsonResource
                 'stok_menipis' => $this['stok_menipis'],
                 'produk_tidak_tersedia' => $this['produk_tidak_tersedia'],
             ],
+
+            'grafik_penjualan' => $this['grafik_penjualan'],
+
+            'pesanan_terbaru' => PesananResource::collection(
+                $this['pesanan_terbaru']
+            ),
+
+            'lokasi_terpilih' => isset($this['lokasi_terpilih']) && $this['lokasi_terpilih']
+                ? new LokasiResource($this['lokasi_terpilih'])
+                : null,
+
+            'penjualan_per_cabang' => $this['penjualan_per_cabang'] ?? [],
         ];
     }
 }

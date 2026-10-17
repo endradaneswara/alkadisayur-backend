@@ -11,8 +11,15 @@ class PesananResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user_id'=> $this->user_id,
+            'user_id' => $this->user_id,
             'nomor_order' => $this->nomor_order,
+            'pelanggan' => $this->whenLoaded('user', function () {
+                return [
+                    'id' => $this->user->id,
+                    'nama' => $this->user->name,
+                    'email' => $this->user->email,
+                ];
+            }),
             'metode' => $this->metode,
             'status' => $this->status,
             'total_harga' => $this->total_harga,

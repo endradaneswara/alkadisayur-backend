@@ -11,7 +11,8 @@ class PenjualanService
 {
     public function index(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = $this->salesQuery($user)->with([
+        $lokasiId = ! empty($filters['lokasi_id']) ? (int) $filters['lokasi_id'] : null;
+        $query = $this->salesQuery($user, $lokasiId)->with([
             'user',
             'alamat',
             'lokasiToko',
@@ -51,24 +52,43 @@ class PenjualanService
             ->findOrFail($id);
     }
 
-    public function summary(User $user): array
+    public function summary(User $user, array $filters = []): array
     {
-        $totals = $this->salesQuery($user)
+        $lokasiId = ! empty($filters['lokasi_id']) ? (int) $filters['lokasi_id'] : null;
+        $query = $this->salesQuery($user, $lokasiId);
+
+        if (! empty($filters['tanggal_mulai'])) {
+            $query->whereDate(
+                'tanggal_pemesanan',
+                '>=',
+                $filters['tanggal_mulai']
+            );
+        }
+
+        if (! empty($filters['tanggal_selesai'])) {
+            $query->whereDate(
+                'tanggal_pemesanan',
+                '<=',
+                $filters['tanggal_selesai']
+            );
+        }
+
+        $totals = $query
             ->selectRaw(
                 'COUNT(*) AS total_transaksi, COALESCE(SUM(total_harga), 0) AS total_penjualan, COALESCE(SUM(biaya_pengiriman), 0) AS total_pengiriman'
             )
             ->first();
 
         return [
-            'total_transaksi' => (int) $totals->total_transaksi,
-            'total_penjualan' => $totals->total_penjualan,
-            'total_pengiriman' => $totals->total_pengiriman,
-            'total_pendapatan' => (float) $totals->total_penjualan
-                + (float) $totals->total_pengiriman,
+            'total_transaksi' => (int) ($totals->total_transaksi ?? 0),
+            'total_penjualan' => $totals->total_penjualan ?? 0,
+            'total_pengiriman' => $totals->total_pengiriman ?? 0,
+            'total_pendapatan' => (float) ($totals->total_penjualan ?? 0)
+                + (float) ($totals->total_pengiriman ?? 0),
         ];
     }
 
-    private function salesQuery(User $user): Builder
+    private function salesQuery(User $user, ?int $lokasiId = null): Builder
     {
         $query = Pesanan::query()->where('status', 'selesai');
 
@@ -78,6 +98,8 @@ class PenjualanService
             }
 
             $query->where('lokasi_toko_id', $user->lokasi_id);
+        } elseif ($user->role === 'superAdmin' && $lokasiId !== null) {
+            $query->where('lokasi_toko_id', $lokasiId);
         }
 
         return $query;

@@ -18,6 +18,7 @@ class UpdateLokasiRequest extends FormRequest
             'latitude' => ['sometimes', 'numeric', 'between:-90,90'],
             'longitude' => ['sometimes', 'numeric', 'between:-180,180'],
             'deskripsi' => ['nullable', 'string'],
+            'link_gmaps' => ['nullable', 'string', 'max:500'],
             'biaya_pengiriman' => ['required', 'numeric', 'min:0'],
         ];
     }
