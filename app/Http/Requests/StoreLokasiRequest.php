@@ -8,7 +8,7 @@ class StoreLokasiRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->role === 'superAdmin';
     }
 
     public function rules(): array

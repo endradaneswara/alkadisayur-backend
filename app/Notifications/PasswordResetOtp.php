@@ -22,7 +22,7 @@ class PasswordResetOtp extends Notification
         return (new MailMessage)
             ->subject('Kode OTP Reset Password')
             ->greeting('Halo,')
-            ->line('Gunakan kode OTP berikut untuk mengatur ulang password akun AlkadiSayur Anda:')
+            ->line('Gunakan kode OTP berikut untuk mengatur ulang password akun Alkadi Fresh Market anda:')
             ->line($this->otp)
             ->line('Kode ini berlaku selama 10 menit dan hanya dapat digunakan satu kali.')
             ->line('Jika Anda tidak meminta reset password, abaikan email ini.');

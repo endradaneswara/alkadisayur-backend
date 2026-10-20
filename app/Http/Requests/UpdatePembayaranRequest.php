@@ -8,7 +8,7 @@ class UpdatePembayaranRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return in_array($this->user()?->role, ['admin', 'superAdmin']);
     }
 
     public function rules(): array

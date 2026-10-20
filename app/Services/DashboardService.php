@@ -87,10 +87,6 @@ class DashboardService
         return $data;
     }
 
-    /**
-     * Query pesanan sesuai peran pengguna: admin hanya melihat
-     * pesanan pada lokasi tokonya, super admin melihat semuanya atau cabang terpilih.
-     */
     private function pesananQuery(User $user, ?int $lokasiId = null): Builder
     {
         $query = Pesanan::query();
@@ -144,9 +140,6 @@ class DashboardService
         return $grafik;
     }
 
-    /**
-     * Lima pesanan terbaru untuk tabel dashboard.
-     */
     private function pesananTerbaru(User $user, ?int $lokasiId = null): Collection
     {
         return $this->pesananQuery($user, $lokasiId)
