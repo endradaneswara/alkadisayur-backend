@@ -8,11 +8,21 @@ use Illuminate\Validation\ValidationException;
 
 class UlasanService
 {
-    public function index(): LengthAwarePaginator
-    {
+    public function index(
+        ?int $perPage = 20,
+        ?int $rating = null,
+        ?string $search = null
+    ): LengthAwarePaginator {
         return Ulasan::with('user')
+            ->when($rating, fn ($query, $r) => $query->where('rating', $r))
+            ->when($search, function ($query, $s) {
+                $query->where(function ($q) use ($s) {
+                    $q->where('komentar', 'like', "%{$s}%")
+                        ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"));
+                });
+            })
             ->latest()
-            ->paginate(20);
+            ->paginate($perPage ?? 20);
     }
 
     public function show(string|int $id): Ulasan
@@ -53,10 +63,15 @@ class UlasanService
 
     public function destroy(
         string|int $userId,
-        string|int $id
+        string|int $id,
+        ?string $userRole = null
     ): void {
-        $ulasan = Ulasan::where('user_id', $userId)
-            ->findOrFail($id);
+        if (in_array($userRole, ['superAdmin', 'admin'])) {
+            $ulasan = Ulasan::findOrFail($id);
+        } else {
+            $ulasan = Ulasan::where('user_id', $userId)
+                ->findOrFail($id);
+        }
 
         $ulasan->delete();
     }

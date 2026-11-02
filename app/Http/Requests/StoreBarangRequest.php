@@ -28,7 +28,7 @@ class StoreBarangRequest extends FormRequest
             'HargaJual' => ['required', 'numeric', 'min:0'],
             'Keterangan' => ['nullable', 'string'],
             'Foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'Status' => ['required', 'in:tersedia,tidak_tersedia'],
+            'Status' => ['sometimes', 'required', 'in:tersedia,tidak tersedia'],
         ];
     }
 }

@@ -17,9 +17,13 @@ class UlasanController extends Controller
         protected UlasanService $ulasanService
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $ulasan = $this->ulasanService->index();
+        $perPage = $request->query('per_page') ? (int) $request->query('per_page') : 20;
+        $rating = $request->query('rating') ? (int) $request->query('rating') : null;
+        $search = $request->query('search');
+
+        $ulasan = $this->ulasanService->index($perPage, $rating, $search);
 
         return $this->success(
             UlasanResource::collection($ulasan),
@@ -71,7 +75,8 @@ class UlasanController extends Controller
     {
         $this->ulasanService->destroy(
             $request->user()->id,
-            $id
+            $id,
+            $request->user()->role
         );
 
         return $this->success(

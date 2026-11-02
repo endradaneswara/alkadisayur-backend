@@ -21,23 +21,9 @@ class BarangExport implements FromCollection, WithColumnFormatting, WithHeadings
         }
 
         return Barang::query()
+            ->with('kategori')
             ->orderBy('KodeItem')
-            ->get([
-                'KodeItem',
-                'Barcode',
-                'SKU',
-                'NamaItem',
-                'kategori_id',
-                'Merek',
-                'Stok',
-                'Rak',
-                'TipeItem',
-                'HargaBeli',
-                'HargaJual',
-                'Keterangan',
-                'Foto',
-                'Status',
-            ]);
+            ->get();
     }
 
     public function map(mixed $barang): array
@@ -51,16 +37,16 @@ class BarangExport implements FromCollection, WithColumnFormatting, WithHeadings
             $barang->Barcode,
             $barang->SKU,
             $barang->NamaItem,
-            $barang->kategori_id,
+            $barang->kategori?->nama_kategori ?? '',
             $barang->Merek,
-            $barang->Stok,
             $barang->Rak,
             $barang->TipeItem,
+            '',
             (float) $barang->HargaBeli,
             (float) $barang->HargaJual,
             $barang->Keterangan,
-            $barang->Foto,
-            $barang->Status,
+            0,
+            0,
         ];
     }
 
@@ -71,16 +57,16 @@ class BarangExport implements FromCollection, WithColumnFormatting, WithHeadings
             'Barcode',
             'SKU',
             'NamaItem',
-            'kategori_id',
+            'Jenis',
             'Merek',
-            'Stok',
             'Rak',
             'TipeItem',
-            'HargaBeli',
+            'Satuan',
+            'HargaPokok',
             'HargaJual',
             'Keterangan',
-            'Foto',
-            'Status',
+            'Poin',
+            'KomisiSales',
         ];
     }
 
@@ -90,7 +76,6 @@ class BarangExport implements FromCollection, WithColumnFormatting, WithHeadings
             'A' => '@',
             'B' => '@',
             'C' => '@',
-            'G' => '0',
             'J' => NumberFormat::FORMAT_NUMBER_00,
             'K' => NumberFormat::FORMAT_NUMBER_00,
         ];

@@ -34,7 +34,7 @@ class BarangFactory extends Factory
             'Foto' => fake()->imageUrl(),
             'Status' => fake()->randomElement([
                 'tersedia',
-                'tidak_tersedia',
+                'tidak tersedia',
             ]),
         ];
     }

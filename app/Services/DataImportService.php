@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Imports\BarangImport;
 use App\Models\Barang;
+use App\Models\Kategori;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -17,7 +18,7 @@ class DataImportService
     /**
      * @var list<string>
      */
-    private const HEADERS = [
+    private const LEGACY_HEADERS = [
         'kodeitem',
         'barcode',
         'sku',
@@ -35,23 +36,45 @@ class DataImportService
     ];
 
     /**
+     * Required conceptual columns for the new Excel format and their acceptable header aliases.
+     *
+     * @var array<string, list<string>>
+     */
+    private const NEW_FORMAT_COLUMNS = [
+        'KodeItem' => ['kodeitem', 'kode_item'],
+        'Barcode' => ['barcode'],
+        'SKU' => ['sku'],
+        'NamaItem' => ['namaitem', 'nama_item'],
+        'Jenis' => ['jenis', 'kategori', 'nama_kategori'],
+        'Merek' => ['merek', 'merk'],
+        'Rak' => ['rak'],
+        'TipeItem' => ['tipeitem', 'tipe_item'],
+        'Satuan' => ['satuan'],
+        'HargaPokok' => ['hargapokok', 'harga_pokok', 'hargapoko', 'harga_poko', 'hargabeli', 'harga_beli'],
+        'HargaJual' => ['hargajual', 'harga_jual'],
+        'Keterangan' => ['keterangan', 'keteranga', 'deskripsi'],
+        'Poin' => ['poin', 'point'],
+        'KomisiSales' => ['komisisales', 'komisi_sales', 'komisisale', 'komisi_sale'],
+    ];
+
+    /**
      * @var array<string, string>
      */
     private const FIELD_MAP = [
-        'kodeitem' => 'KodeItem',
-        'barcode' => 'Barcode',
-        'sku' => 'SKU',
-        'namaitem' => 'NamaItem',
+        'KodeItem' => 'KodeItem',
+        'Barcode' => 'Barcode',
+        'SKU' => 'SKU',
+        'NamaItem' => 'NamaItem',
         'kategori_id' => 'kategori_id',
-        'merek' => 'Merek',
-        'stok' => 'Stok',
-        'rak' => 'Rak',
-        'tipeitem' => 'TipeItem',
-        'hargabeli' => 'HargaBeli',
-        'hargajual' => 'HargaJual',
-        'keterangan' => 'Keterangan',
-        'foto' => 'Foto',
-        'status' => 'Status',
+        'Merek' => 'Merek',
+        'Stok' => 'Stok',
+        'Rak' => 'Rak',
+        'TipeItem' => 'TipeItem',
+        'HargaBeli' => 'HargaBeli',
+        'HargaJual' => 'HargaJual',
+        'Keterangan' => 'Keterangan',
+        'Foto' => 'Foto',
+        'Status' => 'Status',
     ];
 
     /**
@@ -67,7 +90,8 @@ class DataImportService
         return $this->summarize(
             $prepared['rows'],
             [...$prepared['errors'], ...$this->databaseErrors($prepared['rows'], $existing)],
-            $existing
+            $existing,
+            $prepared['has_stok_in_file'] ?? true
         );
     }
 
@@ -87,7 +111,12 @@ class DataImportService
                     ...$prepared['errors'],
                     ...$this->databaseErrors($prepared['rows'], $existing),
                 ];
-                $summary = $this->summarize($prepared['rows'], $errors, $existing);
+                $summary = $this->summarize(
+                    $prepared['rows'],
+                    $errors,
+                    $existing,
+                    $prepared['has_stok_in_file'] ?? true
+                );
 
                 if ($errors === [] && ! hash_equals($summary['preview_hash'], $previewHash)) {
                     $summary['errors'][] = [
@@ -153,7 +182,7 @@ class DataImportService
     }
 
     /**
-     * @return array{rows: list<array{row: int, values: array<string, mixed>}>, errors: list<array{row: int, field: string, message: string}>}
+     * @return array{rows: list<array{row: int, values: array<string, mixed>}>, errors: list<array{row: int, field: string, message: string}>, has_stok_in_file: bool}
      */
     private function prepare(UploadedFile $file): array
     {
@@ -167,6 +196,7 @@ class DataImportService
                     'field' => 'file',
                     'message' => 'File import harus memiliki tepat satu sheet.',
                 ]],
+                'has_stok_in_file' => false,
             ];
         }
 
@@ -175,24 +205,72 @@ class DataImportService
         $headings = $headingRow instanceof Collection
             ? $headingRow->values()->all()
             : (is_array($headingRow) ? array_values($headingRow) : []);
+        $headings = array_map(fn ($h) => is_string($h) ? strtolower(trim($h)) : $h, $headings);
         $errors = [];
 
-        foreach (self::HEADERS as $header) {
-            if (count(array_filter($headings, fn (mixed $value): bool => $value === $header)) !== 1) {
-                $errors[] = [
-                    'row' => 1,
-                    'field' => $header,
-                    'message' => "Header {$header} wajib tersedia tepat satu kali.",
-                ];
+        $isLegacyFormat = in_array('kategori_id', $headings, true);
+
+        if ($isLegacyFormat) {
+            foreach (self::LEGACY_HEADERS as $header) {
+                if (count(array_filter($headings, fn (mixed $value): bool => $value === $header)) !== 1) {
+                    $errors[] = [
+                        'row' => 1,
+                        'field' => $header,
+                        'message' => "Header {$header} wajib tersedia tepat satu kali.",
+                    ];
+                }
+            }
+        } else {
+            $headingCounts = array_count_values(array_map('strval', $headings));
+            foreach ($headingCounts as $head => $count) {
+                if ($count > 1) {
+                    $errors[] = [
+                        'row' => 1,
+                        'field' => (string) $head,
+                        'message' => "Header '{$head}' terduplikasi ({$count} kali) di file Excel.",
+                    ];
+                }
+            }
+
+            foreach (self::NEW_FORMAT_COLUMNS as $colName => $aliases) {
+                $matched = array_filter($headings, fn (mixed $value): bool => in_array($value, $aliases, true));
+                if (count($matched) === 0) {
+                    $errors[] = [
+                        'row' => 1,
+                        'field' => $colName,
+                        'message' => "Header {$colName} wajib tersedia di file Excel.",
+                    ];
+                }
             }
         }
 
         if ($errors !== []) {
-            return ['rows' => [], 'errors' => $errors];
+            return ['rows' => [], 'errors' => $errors, 'has_stok_in_file' => false];
         }
 
         $import = new BarangImport;
         Excel::import($import, $file);
+
+        $hasStokInFile = in_array('stok', $headings, true) || in_array('stock', $headings, true);
+        $hasStatusInFile = in_array('status', $headings, true);
+        $hasFotoInFile = in_array('foto', $headings, true) || in_array('gambar', $headings, true);
+
+        $categories = Kategori::all();
+
+        $codesInFile = [];
+        foreach ($import->rows as $sourceRow) {
+            $source = $sourceRow->all();
+            if ($this->isEmptyRow($source)) {
+                continue;
+            }
+            $code = $this->extractField($source, ['kodeitem', 'kode_item']);
+            if ($code !== null && $code !== '') {
+                $codesInFile[] = (string) $code;
+            }
+        }
+        $existingByCode = $codesInFile !== []
+            ? Barang::whereIn('KodeItem', $codesInFile)->get()->keyBy('KodeItem')
+            : collect();
 
         $preparedRows = [];
         $seenValues = [
@@ -209,21 +287,97 @@ class DataImportService
                 continue;
             }
 
-            $values = [];
+            $kodeItem = $this->extractField($source, ['kodeitem', 'kode_item']);
+            $barcode = $this->extractField($source, ['barcode']);
+            $sku = $this->extractField($source, ['sku']);
+            $namaItem = $this->extractField($source, ['namaitem', 'nama_item']);
+            $merek = $this->extractField($source, ['merek', 'merk']);
+            $rak = $this->extractField($source, ['rak']);
+            $tipeItem = $this->extractField($source, ['tipeitem', 'tipe_item']);
+            $keterangan = $this->extractField($source, ['keterangan', 'keteranga', 'deskripsi']);
 
-            foreach (self::FIELD_MAP as $header => $field) {
-                $value = $source[$header] ?? null;
-                $value = is_string($value) ? trim($value) : $value;
-                $values[$field] = $value === '' ? null : $value;
+            $hargaBeliRaw = $this->extractField($source, ['hargapokok', 'harga_pokok', 'hargapoko', 'harga_poko', 'hargabeli', 'harga_beli']);
+            $hargaBeli = $this->sanitizeNumeric($hargaBeliRaw);
+
+            $hargaJualRaw = $this->extractField($source, ['hargajual', 'harga_jual']);
+            $hargaJual = $this->sanitizeNumeric($hargaJualRaw);
+
+            if ($isLegacyFormat) {
+                $kategoriId = $this->extractField($source, ['kategori_id']);
+                if (is_numeric($kategoriId) && (float) $kategoriId === floor((float) $kategoriId)) {
+                    $kategoriId = (int) $kategoriId;
+                }
+            } else {
+                $jenis = $this->extractField($source, ['jenis', 'kategori', 'nama_kategori']);
+                $kategoriId = $this->resolveKategoriId($jenis, $categories);
+
+                if ($jenis !== null && $kategoriId === null) {
+                    $errors[] = [
+                        'row' => $rowNumber,
+                        'field' => 'Jenis',
+                        'message' => "Jenis '{$jenis}' tidak cocok dengan kategori apapun di database.",
+                    ];
+                }
             }
 
-            if (is_numeric($values['Stok'] ?? null) && (float) $values['Stok'] === floor((float) $values['Stok'])) {
-                $values['Stok'] = (int) $values['Stok'];
+            $existingItem = $kodeItem ? $existingByCode->get($kodeItem) : null;
+
+            if ($hasStokInFile) {
+                $stokVal = $this->extractField($source, ['stok', 'stock']);
+                $stok = is_numeric($stokVal) && (float) $stokVal === floor((float) $stokVal) ? (int) $stokVal : $stokVal;
+            } else {
+                $stok = $existingItem ? (int) $existingItem->Stok : 0;
             }
 
-            if (is_numeric($values['kategori_id'] ?? null) && (float) $values['kategori_id'] === floor((float) $values['kategori_id'])) {
-                $values['kategori_id'] = (int) $values['kategori_id'];
+            if ($hasStatusInFile) {
+                $statusVal = $this->extractField($source, ['status']);
+                if (is_string($statusVal)) {
+                    $statusVal = strtolower(str_replace([' ', '-'], '_', $statusVal));
+                }
+                $status = $statusVal;
+            } else {
+                $status = $existingItem ? $existingItem->Status : ((int) $stok === 0 ? 'tidak_tersedia' : 'tersedia');
             }
+
+            if (is_numeric($stok) && (int) $stok === 0) {
+                $status = 'tidak_tersedia';
+            } elseif (is_numeric($stok) && (int) $stok > 0 && ($status === null || $status === '' || ! $hasStatusInFile)) {
+                $status = 'tersedia';
+            }
+
+            if ($hasFotoInFile) {
+                $foto = $this->extractField($source, ['foto', 'gambar']);
+            } else {
+                $foto = $existingItem ? $existingItem->Foto : null;
+            }
+
+            $values = [
+                'KodeItem' => $kodeItem,
+                'Barcode' => $barcode,
+                'SKU' => $sku,
+                'NamaItem' => $namaItem,
+                'kategori_id' => $kategoriId,
+                'Merek' => $merek,
+                'Stok' => $stok,
+                'Rak' => $rak,
+                'TipeItem' => $tipeItem,
+                'HargaBeli' => $hargaBeli,
+                'HargaJual' => $hargaJual,
+                'Keterangan' => $keterangan,
+                'Foto' => $foto,
+                'Status' => $status,
+            ];
+
+            $customMessages = $isLegacyFormat ? [] : [
+                'kategori_id.required' => 'Kolom Jenis wajib diisi.',
+                'kategori_id.exists' => 'Jenis tidak cocok dengan kategori apapun di database.',
+                'HargaBeli.required' => 'Kolom HargaPokok wajib diisi.',
+            ];
+
+            $customAttributes = $isLegacyFormat ? [] : [
+                'kategori_id' => 'Jenis',
+                'HargaBeli' => 'HargaPokok',
+            ];
 
             $validator = Validator::make($values, [
                 'kategori_id' => ['required', 'integer', 'exists:kategori,id'],
@@ -240,7 +394,7 @@ class DataImportService
                 'Keterangan' => ['nullable', 'string'],
                 'Foto' => ['nullable', 'string', 'max:255'],
                 'Status' => ['required', 'in:tersedia,tidak_tersedia'],
-            ]);
+            ], $customMessages, $customAttributes);
 
             foreach ($validator->errors()->messages() as $field => $messages) {
                 foreach ($messages as $message) {
@@ -292,7 +446,7 @@ class DataImportService
             ];
         }
 
-        return ['rows' => $preparedRows, 'errors' => $errors];
+        return ['rows' => $preparedRows, 'errors' => $errors, 'has_stok_in_file' => $hasStokInFile];
     }
 
     /**
@@ -374,7 +528,7 @@ class DataImportService
      * @param  Collection<int, Barang>  $existing
      * @return array<string, mixed>
      */
-    private function summarize(array $rows, array $errors, Collection $existing): array
+    private function summarize(array $rows, array $errors, Collection $existing, bool $hasStokInFile = true): array
     {
         $created = 0;
         $updated = 0;
@@ -397,7 +551,7 @@ class DataImportService
                 if (! $this->valuesMatch($barang->{$field}, $value, $field)) {
                     $changed = true;
 
-                    if ($field === 'Stok') {
+                    if ($field === 'Stok' && $hasStokInFile) {
                         $stockChanges[] = [
                             'KodeItem' => $barang->KodeItem,
                             'NamaItem' => $barang->NamaItem,
@@ -418,7 +572,7 @@ class DataImportService
         return [
             'valid' => $errors === [],
             'requires_confirmation' => $errors === [],
-            'stock_will_be_set_from_file' => true,
+            'stock_will_be_set_from_file' => $hasStokInFile,
             'blank_optional_cells_are_cleared' => true,
             'created' => $created,
             'updated' => $updated,
@@ -476,5 +630,100 @@ class DataImportService
         }
 
         return true;
+    }
+
+    /**
+     * Resolve kategori_id by matching Jenis against existing Kategori records.
+     *
+     * @param  Collection<int, Kategori>  $categories
+     */
+    private function resolveKategoriId(mixed $jenis, Collection $categories): ?int
+    {
+        if ($jenis === null || $jenis === '') {
+            return null;
+        }
+
+        if (is_numeric($jenis)) {
+            $cat = $categories->firstWhere('id', (int) $jenis);
+            if ($cat !== null) {
+                return $cat->id;
+            }
+        }
+
+        $jenisStr = trim((string) $jenis);
+
+        $cat = $categories->first(fn (Kategori $k): bool => strcasecmp($k->nama_kategori, $jenisStr) === 0);
+        if ($cat !== null) {
+            return $cat->id;
+        }
+
+        $clean = fn (string $str): string => (string) preg_replace('/[^a-z0-9]/', '', strtolower($str));
+        $normalizedJenis = $clean($jenisStr);
+
+        $cat = $categories->first(fn (Kategori $k): bool => $clean($k->nama_kategori) === $normalizedJenis);
+        if ($cat !== null) {
+            return $cat->id;
+        }
+
+        $cat = $categories->first(function (Kategori $k) use ($clean, $normalizedJenis): bool {
+            $catClean = $clean($k->nama_kategori);
+
+            return $catClean !== '' && (str_contains($catClean, $normalizedJenis) || str_contains($normalizedJenis, $catClean));
+        });
+        if ($cat !== null) {
+            return $cat->id;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $source
+     * @param  list<string>  $aliases
+     */
+    private function extractField(array $source, array $aliases): mixed
+    {
+        foreach ($aliases as $alias) {
+            if (array_key_exists($alias, $source)) {
+                $val = $source[$alias];
+                if (is_string($val)) {
+                    $val = trim($val);
+                }
+
+                return $val === '' ? null : $val;
+            }
+        }
+
+        return null;
+    }
+
+    private function sanitizeNumeric(mixed $value): mixed
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $cleaned = trim((string) preg_replace('/[^\d.,]/', '', $value));
+
+            if (preg_match('/^\d{1,3}(\.\d{3})+(,\d+)?$/', $cleaned)) {
+                $cleaned = str_replace('.', '', $cleaned);
+                $cleaned = str_replace(',', '.', $cleaned);
+            } elseif (preg_match('/^\d{1,3}(,\d{3})+(\.\d+)?$/', $cleaned)) {
+                $cleaned = str_replace(',', '', $cleaned);
+            } elseif (substr_count($cleaned, ',') === 1 && substr_count($cleaned, '.') === 0) {
+                $cleaned = str_replace(',', '.', $cleaned);
+            }
+
+            if (is_numeric($cleaned)) {
+                return $cleaned;
+            }
+        }
+
+        return $value;
     }
 }

@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Kategori;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class KategoriSeeder extends Seeder
@@ -16,11 +15,11 @@ class KategoriSeeder extends Seeder
         $kategori = [
             'sayuran',
             'buah',
-            'bumbu_dapur',
-            'bahan_pokok',
+            'bumbu dapur',
+            'bahan pokok',
             'hewani',
-            'makanan_minuman',
-            'frozen_food',
+            'makanan minuman',
+            'frozen food',
             'lainnya',
         ];
 

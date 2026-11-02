@@ -21,6 +21,10 @@ class BarangService
 
     public function store(array $data): Barang
     {
+        if (isset($data['Stok'])) {
+            $data['Status'] = (int) $data['Stok'] === 0 ? 'tidak tersedia' : 'tersedia';
+        }
+
         $barang = Barang::create($data);
 
         return $barang->load('kategori');
@@ -29,6 +33,11 @@ class BarangService
     public function update(string|int $id, array $data): Barang
     {
         $barang = Barang::findOrFail($id);
+
+        if (isset($data['Stok'])) {
+            $data['Status'] = (int) $data['Stok'] === 0 ? 'tidak tersedia' : 'tersedia';
+        }
+
         $barang->update($data);
 
         return $barang->fresh()->load('kategori');

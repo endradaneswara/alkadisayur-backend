@@ -59,6 +59,23 @@ test('a customer cannot add an unavailable product or more than available stock'
         ->assertJsonValidationErrors('barang_id');
 });
 
+test('a customer cannot add a product with zero stock even if status was set to tersedia', function () {
+    $user = User::factory()->create(['role' => 'customer']);
+    $kategori = Kategori::factory()->create();
+    $barang = Barang::factory()->create([
+        'kategori_id' => $kategori->id,
+        'Stok' => 0,
+        'Status' => 'tersedia',
+    ]);
+    $this->actingAs($user, 'sanctum');
+
+    $this->postJson('/api/keranjang/items', [
+        'barang_id' => $barang->id,
+        'jumlah' => 1,
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors('barang_id');
+});
+
 test('guests cannot access the cart', function () {
     $this->getJson('/api/keranjang')->assertUnauthorized();
     $this->postJson('/api/keranjang/items', [])->assertUnauthorized();

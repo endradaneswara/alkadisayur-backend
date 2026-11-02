@@ -89,10 +89,10 @@ class PesananService
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                if ($barang->Status !== 'tersedia') {
+                if ($barang->Status !== 'tersedia' || $barang->Stok <= 0) {
                     throw ValidationException::withMessages([
                         'barang' => [
-                            "Barang {$barang->NamaItem} tidak tersedia.",
+                            "Barang {$barang->NamaItem} habis.",
                         ],
                     ]);
                 }
@@ -156,6 +156,10 @@ class PesananService
                     'Stok',
                     $item->jumlah
                 );
+
+                if ($item->barang->fresh()->Stok <= 0) {
+                    $item->barang->update(['Status' => 'tidak_tersedia']);
+                }
             }
 
             $keranjang->items()->delete();
@@ -188,10 +192,12 @@ class PesananService
                 $barang = $item->barang()
                     ->lockForUpdate()
                     ->firstOrFail();
-
                 $barang->increment('Stok', $item->jumlah);
-            }
 
+                if ($barang->fresh()->Stok > 0 && $barang->Status === 'tidak_tersedia') {
+                    $barang->update(['Status' => 'tersedia']);
+                }
+            }
             $pesanan->update(['status' => 'dibatalkan']);
 
             return $pesanan->fresh([

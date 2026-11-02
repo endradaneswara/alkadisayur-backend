@@ -84,3 +84,22 @@ test('a customer cannot view another customers order', function () {
         ->getJson("/api/pesanan/{$pesanan->id}")
         ->assertNotFound();
 });
+
+test('when an order depletes product stock to 0 status becomes tidak_tersedia and restoring brings it back to tersedia', function () {
+    $user = User::factory()->create(['role' => 'customer']);
+    [$barang, $alamat, $lokasi] = prepareCustomerOrder($this, $user, 2);
+
+    $orderResponse = $this->postJson('/api/pesanan', [
+        'metode' => 'ambil_ditoko',
+        'lokasi_toko_id' => $lokasi->id,
+    ])->assertCreated();
+
+    expect((int) $barang->fresh()->Stok)->toBe(0)
+        ->and($barang->fresh()->Status)->toBe('tidak_tersedia');
+
+    $orderId = $orderResponse->json('data.id');
+    $this->deleteJson("/api/pesanan/{$orderId}")->assertOk();
+
+    expect((int) $barang->fresh()->Stok)->toBe(2)
+        ->and($barang->fresh()->Status)->toBe('tersedia');
+});

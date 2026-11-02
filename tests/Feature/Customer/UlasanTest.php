@@ -42,3 +42,50 @@ test('a customer cannot change or delete another customers review', function () 
 test('a guest cannot submit a review', function () {
     $this->postJson('/api/ulasan', ['rating' => 5])->assertUnauthorized();
 });
+
+test('a super admin can view all reviews and filter them', function () {
+    $superAdmin = User::factory()->create(['role' => 'superAdmin']);
+    $user1 = User::factory()->create(['name' => 'Budi Santoso']);
+    $user2 = User::factory()->create(['name' => 'Siti Rahma']);
+
+    Ulasan::factory()->create([
+        'user_id' => $user1->id,
+        'rating' => 5,
+        'komentar' => 'Sayur sangat segar dan berkualitas.',
+    ]);
+    Ulasan::factory()->create([
+        'user_id' => $user2->id,
+        'rating' => 3,
+        'komentar' => 'Pengiriman agak terlambat.',
+    ]);
+
+    $this->actingAs($superAdmin, 'sanctum')
+        ->getJson('/api/ulasan')
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
+
+    $this->getJson('/api/ulasan?rating=5')
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.rating', 5);
+
+    $this->getJson('/api/ulasan?search=Budi')
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.user.name', 'Budi Santoso');
+});
+
+test('a super admin can delete any review', function () {
+    $superAdmin = User::factory()->create(['role' => 'superAdmin']);
+    $user = User::factory()->create();
+    $ulasan = Ulasan::factory()->create(['user_id' => $user->id]);
+
+    $this->actingAs($superAdmin, 'sanctum')
+        ->deleteJson("/api/ulasan/{$ulasan->id}")
+        ->assertOk()
+        ->assertJsonPath('message', 'Ulasan berhasil dihapus.');
+
+    $this->assertDatabaseMissing('ulasan', [
+        'id' => $ulasan->id,
+    ]);
+});

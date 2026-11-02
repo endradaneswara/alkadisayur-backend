@@ -26,9 +26,9 @@ class KeranjangService
 
             $barang = Barang::findOrFail($data['barang_id']);
 
-            if ($barang->Status !== 'tersedia') {
+            if ($barang->Status !== 'tersedia' || $barang->Stok <= 0) {
                 throw ValidationException::withMessages([
-                    'barang_id' => ['Barang sedang tidak tersedia.'],
+                    'barang_id' => ['Barang sedang habis.'],
                 ]);
             }
 
@@ -87,9 +87,9 @@ class KeranjangService
                 ->with('barang')
                 ->findOrFail($itemId);
 
-            if ($item->barang->Status !== 'tersedia') {
+            if ($item->barang->Status !== 'tersedia' || $item->barang->Stok <= 0) {
                 throw ValidationException::withMessages([
-                    'barang_id' => ['Barang sedang tidak tersedia.'],
+                    'barang_id' => ['Barang sedang habis.'],
                 ]);
             }
 
