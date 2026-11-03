@@ -1,0 +1,49 @@
+name: Backend CD
+
+on:
+  workflow_run:
+    workflows: [Backend CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy over SSH
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.DEPLOY_PATH }} &&
+            git pull origin main &&
+            composer install --no-progress --prefer-dist --no-dev --no-interaction &&
+            npm ci &&
+            npm run build &&
+            php artisan migrate --force &&
+            php artisan config:cache &&
+            php artisan route:cache &&
+            php artisan view:cache &&
+            php artisan queue:restart
+          "

@@ -1,0 +1,60 @@
+name: Backend CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-progress --prefer-dist --no-interaction
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+
+      - name: Check code style (Pint)
+        run: composer lint:check
+
+      - name: Check PHP types (PHPStan)
+        run: composer types:check
+
+      - name: Check JS (ESLint)
+        run: npm run check
+
+      - name: Check TS types
+        run: npm run types:check
+
+      - name: Run tests (Pest)
+        run: php artisan test
+
+      - name: Build assets
+        run: npm run build
