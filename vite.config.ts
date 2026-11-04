@@ -45,6 +45,7 @@ export default defineConfig({
             'node_modules/**',
             'public/**',
             'bootstrap/ssr/**',
+            'graphify-out/**',
             'tailwind.config.js',
             'resources/js/actions/**',
             'resources/js/components/ui/*',
@@ -65,6 +66,7 @@ export default defineConfig({
         htmlWhitespaceSensitivity: 'css',
         ignorePatterns: [
             '.github/**',
+            'graphify-out/**',
             'composer.json',
             'resources/js/components/ui/*',
             'resources/views/mail/*',

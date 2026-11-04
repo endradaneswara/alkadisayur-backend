@@ -1,3 +1,4 @@
+/graphify-out
 /.phpunit.cache
 /bootstrap/ssr
 /node_modules
