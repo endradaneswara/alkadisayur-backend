@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\PesananItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read Barang|null $barang
+ */
 class PesananItem extends Model
 {
+    /** @use HasFactory<PesananItemFactory> */
     use HasFactory;
 
     protected $table = 'pesanan_item';
@@ -32,11 +37,13 @@ class PesananItem extends Model
         ];
     }
 
+    /** @return BelongsTo<Pesanan, $this> */
     public function pesanan(): BelongsTo
     {
         return $this->belongsTo(Pesanan::class);
     }
 
+    /** @return BelongsTo<Barang, $this> */
     public function barang(): BelongsTo
     {
         return $this->belongsTo(Barang::class);

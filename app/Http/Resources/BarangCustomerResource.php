@@ -11,12 +11,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class BarangCustomerResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
             'kategori_id' => $this->kategori_id,
-            'nama_kategori' => $this->whenLoaded('kategori', fn () => $this->kategori?->nama_kategori),
+            'nama_kategori' => $this->whenLoaded('kategori', fn () => $this->kategori->nama_kategori),
             'NamaItem' => $this->NamaItem,
             'Merek' => $this->Merek,
             'TipeItem' => $this->TipeItem,

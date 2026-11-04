@@ -9,6 +9,7 @@ use App\Http\Resources\BarangResource;
 use App\Http\Resources\KategoriResource;
 use App\Services\KategoriService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class KategoriController extends Controller
 {
@@ -16,7 +17,7 @@ class KategoriController extends Controller
 
     public function __construct(protected KategoriService $kategoriService) {}
 
-    public function index()
+    public function index(): JsonResponse
     {
         $kategori = $this->kategoriService->index();
 
@@ -26,7 +27,7 @@ class KategoriController extends Controller
         );
     }
 
-    public function store(StoreKategoriRequest $request)
+    public function store(StoreKategoriRequest $request): JsonResponse
     {
         $kategori = $this->kategoriService->store($request->validated());
 
@@ -37,7 +38,7 @@ class KategoriController extends Controller
         );
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $kategori = $this->kategoriService->show($id);
 
@@ -47,7 +48,7 @@ class KategoriController extends Controller
         );
     }
 
-    public function update(UpdateKategoriRequest $request, string $id)
+    public function update(UpdateKategoriRequest $request, string $id): JsonResponse
     {
         $kategori = $this->kategoriService->update($id, $request->validated());
 
@@ -57,14 +58,14 @@ class KategoriController extends Controller
         );
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $this->kategoriService->destroy($id);
 
         return $this->success(null, 'Kategori berhasil dihapus.');
     }
 
-    public function barang(string $id)
+    public function barang(string $id): JsonResponse
     {
         $barang = $this->kategoriService->barang($id);
         $user = request()->user();

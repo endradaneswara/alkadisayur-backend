@@ -2,11 +2,16 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Keranjang;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Keranjang
+ */
 class KeranjangResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
@@ -22,7 +27,7 @@ class KeranjangResource extends JsonResource
             'total_harga' => $this->whenLoaded(
                 'items',
                 fn () => $this->items->sum(
-                    fn ($item) => $item->jumlah * $item->harga
+                    fn (mixed $item): float => (float) $item->jumlah * (float) $item->harga
                 )
             ),
             'created_at' => $this->created_at,

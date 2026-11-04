@@ -9,6 +9,10 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class PenjualanService
 {
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return LengthAwarePaginator<int, Pesanan>
+     */
     public function index(User $user, array $filters = []): LengthAwarePaginator
     {
         $lokasiId = ! empty($filters['lokasi_id']) ? (int) $filters['lokasi_id'] : null;
@@ -52,6 +56,10 @@ class PenjualanService
             ->findOrFail($id);
     }
 
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<string, mixed>
+     */
     public function summary(User $user, array $filters = []): array
     {
         $lokasiId = ! empty($filters['lokasi_id']) ? (int) $filters['lokasi_id'] : null;
@@ -88,6 +96,7 @@ class PenjualanService
         ];
     }
 
+    /** @return Builder<Pesanan> */
     private function salesQuery(User $user, ?int $lokasiId = null): Builder
     {
         $query = Pesanan::query()->where('status', 'selesai');

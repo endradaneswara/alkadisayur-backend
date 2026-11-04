@@ -6,19 +6,19 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Laravel\Sanctum\TransientToken;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
     use ApiResponse;
 
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
             'name' => $request->name,
@@ -31,7 +31,7 @@ class AuthController extends Controller
         return $this->authenticatedResponse($request, $user, 'Registrasi akun berhasil.');
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
             'login' => ['required', 'string'],
@@ -51,16 +51,26 @@ class AuthController extends Controller
         return $this->authenticatedResponse($request, $user, 'Login berhasil.');
     }
 
-    public function redirectGoogle()
+    public function redirectGoogle(): RedirectResponse
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        $provider = Socialite::driver('google');
+
+        if (method_exists($provider, 'stateless')) {
+            $provider = $provider->stateless();
+        }
+
+        return $provider->redirect();
     }
 
-    public function callbackGoogle(Request $request)
+    public function callbackGoogle(Request $request): RedirectResponse
     {
-        $googleUser = Socialite::driver('google')
-            ->stateless()
-            ->user();
+        $provider = Socialite::driver('google');
+
+        if (method_exists($provider, 'stateless')) {
+            $provider = $provider->stateless();
+        }
+
+        $googleUser = $provider->user();
 
         if (! $googleUser->getEmail()) {
             throw ValidationException::withMessages([
@@ -118,13 +128,11 @@ class AuthController extends Controller
         return redirect()->away($frontendCallback.'?status=success');
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         $accessToken = $request->user()->currentAccessToken();
 
-        if ($accessToken && ! $accessToken instanceof TransientToken) {
-            $accessToken->delete();
-        }
+        $accessToken->delete();
 
         if ($request->hasSession()) {
             Auth::guard('web')->logout();

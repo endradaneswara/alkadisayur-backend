@@ -91,7 +91,7 @@ class DataImportService
             $prepared['rows'],
             [...$prepared['errors'], ...$this->databaseErrors($prepared['rows'], $existing)],
             $existing,
-            $prepared['has_stok_in_file'] ?? true
+            $prepared['has_stok_in_file']
         );
     }
 
@@ -115,7 +115,7 @@ class DataImportService
                     $prepared['rows'],
                     $errors,
                     $existing,
-                    $prepared['has_stok_in_file'] ?? true
+                    $prepared['has_stok_in_file']
                 );
 
                 if ($errors === [] && ! hash_equals($summary['preview_hash'], $previewHash)) {
@@ -204,7 +204,7 @@ class DataImportService
         $headingRow = $headingSheet?->first();
         $headings = $headingRow instanceof Collection
             ? $headingRow->values()->all()
-            : (is_array($headingRow) ? array_values($headingRow) : []);
+            : [];
         $headings = array_map(fn ($h) => is_string($h) ? strtolower(trim($h)) : $h, $headings);
         $errors = [];
 

@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\PembayaranFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read Pesanan|null $pesanan
+ */
 class Pembayaran extends Model
 {
+    /** @use HasFactory<PembayaranFactory> */
     use HasFactory;
 
     protected $table = 'pembayaran';
@@ -33,6 +38,7 @@ class Pembayaran extends Model
     /**
      * Get the order associated with this payment.
      */
+    /** @return BelongsTo<Pesanan, $this> */
     public function pesanan(): BelongsTo
     {
         return $this->belongsTo(Pesanan::class);

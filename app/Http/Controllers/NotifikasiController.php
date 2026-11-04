@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\NotifikasiResource;
 use App\Services\NotifikasiService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class NotifikasiController extends Controller
@@ -15,7 +16,7 @@ class NotifikasiController extends Controller
         protected NotifikasiService $notifikasiService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $notifikasi = $this->notifikasiService->index(
             $request->user()->id
@@ -27,7 +28,7 @@ class NotifikasiController extends Controller
         );
     }
 
-    public function show(Request $request, string $id)
+    public function show(Request $request, string $id): JsonResponse
     {
         $notifikasi = $this->notifikasiService->show(
             $request->user()->id,
@@ -40,7 +41,7 @@ class NotifikasiController extends Controller
         );
     }
 
-    public function read(Request $request, string $id)
+    public function read(Request $request, string $id): JsonResponse
     {
         $notifikasi = $this->notifikasiService->read(
             $request->user()->id,
@@ -53,7 +54,7 @@ class NotifikasiController extends Controller
         );
     }
 
-    public function readAll(Request $request)
+    public function readAll(Request $request): JsonResponse
     {
         $this->notifikasiService->readAll(
             $request->user()->id
@@ -65,7 +66,7 @@ class NotifikasiController extends Controller
         );
     }
 
-    public function destroy(Request $request, string $id)
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $this->notifikasiService->destroy(
             $request->user()->id,

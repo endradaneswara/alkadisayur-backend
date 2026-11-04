@@ -2,12 +2,13 @@
 
 namespace App\Traits;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Pagination\AbstractPaginator;
 
 trait ApiResponse
 {
-    protected function success(mixed $data = null, string $message = 'Berhasil.', int $status = 200)
+    protected function success(mixed $data = null, string $message = 'Berhasil.', int $status = 200): JsonResponse
     {
         if ($data instanceof ResourceCollection && $data->resource instanceof AbstractPaginator) {
             $paginatedResponse = $data->response()->getData(true);
@@ -28,7 +29,7 @@ trait ApiResponse
         ], $status);
     }
 
-    protected function error(string $message = 'Terjadi Kesalahan.', int $status = 400)
+    protected function error(string $message = 'Terjadi Kesalahan.', int $status = 400): JsonResponse
     {
         return response()->json([
             'success' => false,

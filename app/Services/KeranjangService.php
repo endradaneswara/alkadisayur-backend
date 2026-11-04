@@ -20,10 +20,12 @@ class KeranjangService
             ]);
     }
 
+    /** @param array<string, mixed> $data */
     public function store(string|int $userId, array $data): Keranjang
     {
         return DB::transaction(function () use ($userId, $data) {
 
+            /** @var Barang $barang */
             $barang = Barang::findOrFail($data['barang_id']);
 
             if ($barang->Status !== 'tersedia' || $barang->Stok <= 0) {
@@ -73,6 +75,7 @@ class KeranjangService
         });
     }
 
+    /** @param array<string, mixed> $data */
     public function update(
         string|int $userId,
         string|int $itemId,

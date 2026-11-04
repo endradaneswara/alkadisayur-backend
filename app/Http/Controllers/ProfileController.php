@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProfileRequest;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
     use ApiResponse;
 
-    public function show(Request $request)
+    public function show(Request $request): JsonResponse
     {
         $user = $request->user()->loadMissing('lokasi');
 
@@ -32,7 +33,7 @@ class ProfileController extends Controller
         );
     }
 
-    public function update(UpdateProfileRequest $request)
+    public function update(UpdateProfileRequest $request): JsonResponse
     {
         $user = $request->user();
         $data = $request->validated();

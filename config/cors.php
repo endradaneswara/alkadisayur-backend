@@ -1,6 +1,6 @@
 <?php
 
-$allowedOrigins = env(
+$allowedOrigins = (string) env(
     'CORS_ALLOWED_ORIGINS',
     env('FRONTEND_URL', 'http://localhost:3000')
 );

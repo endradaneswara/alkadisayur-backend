@@ -72,12 +72,12 @@ class DashboardService
                     $q->where('status', 'selesai');
                 }], DB::raw('total_harga + biaya_pengiriman'))
                 ->get()
-                ->map(function ($lokasi) {
+                ->map(function (Lokasi $lokasi) {
                     return [
                         'id' => $lokasi->id,
                         'nama' => $lokasi->nama,
-                        'total_pesanan' => (int) $lokasi->total_pesanan,
-                        'total_penjualan' => (float) ($lokasi->total_penjualan ?? 0),
+                        'total_pesanan' => (int) $lokasi->getAttribute('total_pesanan'),
+                        'total_penjualan' => (float) ($lokasi->getAttribute('total_penjualan') ?? 0),
                     ];
                 })
                 ->values()
@@ -87,6 +87,7 @@ class DashboardService
         return $data;
     }
 
+    /** @return Builder<Pesanan> */
     private function pesananQuery(User $user, ?int $lokasiId = null): Builder
     {
         $query = Pesanan::query();
@@ -140,6 +141,7 @@ class DashboardService
         return $grafik;
     }
 
+    /** @return Collection<int, Pesanan> */
     private function pesananTerbaru(User $user, ?int $lokasiId = null): Collection
     {
         return $this->pesananQuery($user, $lokasiId)

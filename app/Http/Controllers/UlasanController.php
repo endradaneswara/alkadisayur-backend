@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateUlasanRequest;
 use App\Http\Resources\UlasanResource;
 use App\Services\UlasanService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UlasanController extends Controller
@@ -17,7 +18,7 @@ class UlasanController extends Controller
         protected UlasanService $ulasanService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $perPage = $request->query('per_page') ? (int) $request->query('per_page') : 20;
         $rating = $request->query('rating') ? (int) $request->query('rating') : null;
@@ -31,7 +32,7 @@ class UlasanController extends Controller
         );
     }
 
-    public function store(StoreUlasanRequest $request)
+    public function store(StoreUlasanRequest $request): JsonResponse
     {
         $ulasan = $this->ulasanService->store(
             $request->user()->id,
@@ -45,7 +46,7 @@ class UlasanController extends Controller
         );
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $ulasan = $this->ulasanService->show($id);
 
@@ -58,7 +59,7 @@ class UlasanController extends Controller
     public function update(
         UpdateUlasanRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $ulasan = $this->ulasanService->update(
             $request->user()->id,
             $id,
@@ -71,7 +72,7 @@ class UlasanController extends Controller
         );
     }
 
-    public function destroy(Request $request, string $id)
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $this->ulasanService->destroy(
             $request->user()->id,

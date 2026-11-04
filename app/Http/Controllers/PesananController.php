@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePesananRequest;
 use App\Http\Resources\PesananResource;
 use App\Services\PesananService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PesananController extends Controller
@@ -17,7 +18,7 @@ class PesananController extends Controller
         protected PesananService $pesananService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $pesanan = $this->pesananService->index(
             $request->user()->id
@@ -29,7 +30,7 @@ class PesananController extends Controller
         );
     }
 
-    public function store(StorePesananRequest $request)
+    public function store(StorePesananRequest $request): JsonResponse
     {
         $pesanan = $this->pesananService->store(
             $request->user()->id,
@@ -43,7 +44,7 @@ class PesananController extends Controller
         );
     }
 
-    public function show(Request $request, string $id)
+    public function show(Request $request, string $id): JsonResponse
     {
         $pesanan = $this->pesananService->show(
             $request->user()->id,
@@ -56,7 +57,7 @@ class PesananController extends Controller
         );
     }
 
-    public function destroy(Request $request, string $id)
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $pesanan = $this->pesananService->cancel(
             $request->user()->id,
@@ -69,7 +70,7 @@ class PesananController extends Controller
         );
     }
 
-    public function adminIndex(Request $request)
+    public function adminIndex(Request $request): JsonResponse
     {
         $user = $request->user();
 
@@ -90,7 +91,7 @@ class PesananController extends Controller
         );
     }
 
-    public function adminShow(Request $request, string $id)
+    public function adminShow(Request $request, string $id): JsonResponse
     {
         $pesanan = $this->pesananService->adminShow(
             $request->user(),
@@ -106,7 +107,7 @@ class PesananController extends Controller
     public function updateStatus(
         UpdatePesananRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $pesanan = $this->pesananService->updateStatus(
             $request->user(),
             $id,

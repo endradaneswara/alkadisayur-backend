@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -49,27 +51,32 @@ class User extends Authenticatable implements MustVerifyEmailContract
         ];
     }
 
-    public function pesanan()
+    /** @return HasMany<Pesanan, $this> */
+    public function pesanan(): HasMany
     {
         return $this->hasMany(Pesanan::class);
     }
 
-    public function alamat()
+    /** @return HasMany<Alamat, $this> */
+    public function alamat(): HasMany
     {
         return $this->hasMany(Alamat::class);
     }
 
-    public function ulasan()
+    /** @return HasOne<Ulasan, $this> */
+    public function ulasan(): HasOne
     {
         return $this->hasOne(Ulasan::class);
     }
 
-    public function notifikasi()
+    /** @return HasMany<Notifikasi, $this> */
+    public function notifikasi(): HasMany
     {
         return $this->hasMany(Notifikasi::class);
     }
 
-    public function lokasi()
+    /** @return BelongsTo<Lokasi, $this> */
+    public function lokasi(): BelongsTo
     {
         return $this->belongsTo(Lokasi::class, 'lokasi_id');
     }

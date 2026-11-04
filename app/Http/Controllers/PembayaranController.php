@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePembayaranRequest;
 use App\Http\Resources\PembayaranResource;
 use App\Services\PembayaranService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PembayaranController extends Controller
@@ -17,7 +18,7 @@ class PembayaranController extends Controller
         protected PembayaranService $pembayaranService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $pembayaran = $this->pembayaranService->index(
             $request->user()->id
@@ -29,7 +30,7 @@ class PembayaranController extends Controller
         );
     }
 
-    public function store(StorePembayaranRequest $request)
+    public function store(StorePembayaranRequest $request): JsonResponse
     {
         $pembayaran = $this->pembayaranService->store(
             $request->user()->id,
@@ -46,7 +47,7 @@ class PembayaranController extends Controller
     public function show(
         Request $request,
         string $id
-    ) {
+    ): JsonResponse {
         $pembayaran = $this->pembayaranService->show(
             $request->user()->id,
             $id
@@ -61,7 +62,7 @@ class PembayaranController extends Controller
     public function update(
         UpdatePembayaranRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $pembayaran = $this->pembayaranService->update(
             $request->user(),
             $id,

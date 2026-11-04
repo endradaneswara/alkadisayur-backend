@@ -7,6 +7,7 @@ use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Services\PasswordService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 
 class PasswordController extends Controller
@@ -17,7 +18,7 @@ class PasswordController extends Controller
         protected PasswordService $passwordService
     ) {}
 
-    public function forgot(LupaPasswordRequest $request)
+    public function forgot(LupaPasswordRequest $request): JsonResponse
     {
         $this->passwordService->sendResetOtp(
             $request->email
@@ -29,7 +30,7 @@ class PasswordController extends Controller
         );
     }
 
-    public function reset(ResetPasswordRequest $request)
+    public function reset(ResetPasswordRequest $request): JsonResponse
     {
         $this->passwordService->resetPassword(
             $request->validated()
@@ -41,7 +42,7 @@ class PasswordController extends Controller
         );
     }
 
-    public function update(UpdatePasswordRequest $request)
+    public function update(UpdatePasswordRequest $request): JsonResponse
     {
         $user = $request->user();
 

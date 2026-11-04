@@ -6,6 +6,7 @@ use App\Http\Requests\UpdateUserRoleRequest;
 use App\Http\Resources\UserResource;
 use App\Services\UserService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
@@ -15,7 +16,7 @@ class UserController extends Controller
         protected UserService $userService
     ) {}
 
-    public function index()
+    public function index(): JsonResponse
     {
         $users = $this->userService->index();
 
@@ -25,7 +26,7 @@ class UserController extends Controller
         );
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $user = $this->userService->show($id);
 
@@ -38,7 +39,7 @@ class UserController extends Controller
     public function updateRole(
         UpdateUserRoleRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $user = $this->userService->updateRole(
             $id,
             $request->validated()['role']

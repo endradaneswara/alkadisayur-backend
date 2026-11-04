@@ -2,11 +2,16 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Ulasan;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Ulasan
+ */
 class UlasanResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [

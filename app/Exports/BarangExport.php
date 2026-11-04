@@ -3,18 +3,25 @@
 namespace App\Exports;
 
 use App\Models\Barang;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
+/**
+ * @implements FromCollection<int, Barang>
+ * @implements WithMapping<Barang>
+ */
 class BarangExport implements FromCollection, WithColumnFormatting, WithHeadings, WithMapping
 {
     public function __construct(private readonly bool $template = false) {}
 
-    public function collection(): Collection
+    /**
+     * @return Enumerable<int, Barang>
+     */
+    public function collection(): Enumerable
     {
         if ($this->template) {
             return collect();
@@ -28,16 +35,12 @@ class BarangExport implements FromCollection, WithColumnFormatting, WithHeadings
 
     public function map(mixed $barang): array
     {
-        if (! $barang instanceof Barang) {
-            throw new \LogicException('Export barang menerima data dengan tipe yang tidak valid.');
-        }
-
         return [
             $barang->KodeItem,
             $barang->Barcode,
             $barang->SKU,
             $barang->NamaItem,
-            $barang->kategori?->nama_kategori ?? '',
+            $barang->kategori->nama_kategori ?? '',
             $barang->Merek,
             $barang->Rak,
             $barang->TipeItem,

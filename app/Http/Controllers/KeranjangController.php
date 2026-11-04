@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateKeranjangItemRequest;
 use App\Http\Resources\KeranjangResource;
 use App\Services\KeranjangService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class KeranjangController extends Controller
@@ -17,7 +18,7 @@ class KeranjangController extends Controller
         protected KeranjangService $keranjangService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $keranjang = $this->keranjangService->index(
             $request->user()->id
@@ -31,7 +32,7 @@ class KeranjangController extends Controller
 
     public function store(
         StoreKeranjangItemRequest $request
-    ) {
+    ): JsonResponse {
         $keranjang = $this->keranjangService->store(
             $request->user()->id,
             $request->validated()
@@ -47,7 +48,7 @@ class KeranjangController extends Controller
     public function update(
         UpdateKeranjangItemRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $keranjang = $this->keranjangService->update(
             $request->user()->id,
             $id,
@@ -63,7 +64,7 @@ class KeranjangController extends Controller
     public function destroy(
         Request $request,
         string $id
-    ) {
+    ): JsonResponse {
         $this->keranjangService->destroy(
             $request->user()->id,
             $id
@@ -75,7 +76,7 @@ class KeranjangController extends Controller
         );
     }
 
-    public function clear(Request $request)
+    public function clear(Request $request): JsonResponse
     {
         $this->keranjangService->clear(
             $request->user()->id

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PenjualanResource;
 use App\Services\PenjualanService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PenjualanController extends Controller
@@ -15,7 +16,7 @@ class PenjualanController extends Controller
         protected PenjualanService $penjualanService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $endDateRules = ['sometimes', 'nullable', 'date'];
 
@@ -40,7 +41,7 @@ class PenjualanController extends Controller
         );
     }
 
-    public function show(Request $request, string $id)
+    public function show(Request $request, string $id): JsonResponse
     {
         $penjualan = $this->penjualanService->show(
             $request->user(),
@@ -53,7 +54,7 @@ class PenjualanController extends Controller
         );
     }
 
-    public function summary(Request $request)
+    public function summary(Request $request): JsonResponse
     {
         $endDateRules = ['sometimes', 'nullable', 'date'];
 

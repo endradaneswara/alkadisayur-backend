@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateAlamatRequest;
 use App\Http\Resources\AlamatResource;
 use App\Services\AlamatService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AlamatController extends Controller
@@ -17,7 +18,7 @@ class AlamatController extends Controller
         protected AlamatService $alamatService
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $alamat = $this->alamatService->index(
             $request->user()->id
@@ -29,7 +30,7 @@ class AlamatController extends Controller
         );
     }
 
-    public function store(StoreAlamatRequest $request)
+    public function store(StoreAlamatRequest $request): JsonResponse
     {
         $alamat = $this->alamatService->store(
             $request->user()->id,
@@ -46,7 +47,7 @@ class AlamatController extends Controller
     public function show(
         Request $request,
         string $id
-    ) {
+    ): JsonResponse {
         $alamat = $this->alamatService->show(
             $request->user()->id,
             $id
@@ -61,7 +62,7 @@ class AlamatController extends Controller
     public function update(
         UpdateAlamatRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $alamat = $this->alamatService->update(
             $request->user()->id,
             $id,
@@ -77,7 +78,7 @@ class AlamatController extends Controller
     public function destroy(
         Request $request,
         string $id
-    ) {
+    ): JsonResponse {
         $this->alamatService->destroy(
             $request->user()->id,
             $id

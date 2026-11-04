@@ -2,11 +2,16 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Pesanan
+ */
 class PesananResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [

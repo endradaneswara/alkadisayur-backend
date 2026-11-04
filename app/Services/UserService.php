@@ -7,6 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserService
 {
+    /** @return LengthAwarePaginator<int, User> */
     public function index(): LengthAwarePaginator
     {
         return User::latest()->paginate(20);

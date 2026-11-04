@@ -11,6 +11,7 @@ class UpdatePembayaranRequest extends FormRequest
         return in_array($this->user()?->role, ['admin', 'superAdmin']);
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [

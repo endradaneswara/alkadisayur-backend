@@ -46,6 +46,7 @@ class PasswordService
         }
     }
 
+    /** @param array<string, mixed> $data */
     public function resetPassword(array $data): void
     {
         DB::transaction(function () use ($data): void {

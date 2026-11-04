@@ -8,6 +8,7 @@ use App\Http\Resources\BarangCustomerResource;
 use App\Http\Resources\BarangResource;
 use App\Services\BarangService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class BarangController extends Controller
 {
@@ -15,7 +16,7 @@ class BarangController extends Controller
 
     public function __construct(protected BarangService $barangService) {}
 
-    public function index()
+    public function index(): JsonResponse
     {
         $barang = $this->barangService->index();
         $user = request()->user();
@@ -33,7 +34,7 @@ class BarangController extends Controller
         );
     }
 
-    public function store(StoreBarangRequest $request)
+    public function store(StoreBarangRequest $request): JsonResponse
     {
         $barang = $this->barangService->store($request->validated());
 
@@ -44,7 +45,7 @@ class BarangController extends Controller
         );
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $barang = $this->barangService->show($id);
         $user = request()->user();
@@ -62,7 +63,7 @@ class BarangController extends Controller
         );
     }
 
-    public function update(UpdateBarangRequest $request, string $id)
+    public function update(UpdateBarangRequest $request, string $id): JsonResponse
     {
         $barang = $this->barangService->update(
             $id,
@@ -75,7 +76,7 @@ class BarangController extends Controller
         );
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $this->barangService->destroy($id);
 

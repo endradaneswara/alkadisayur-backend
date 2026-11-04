@@ -7,6 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class BarangService
 {
+    /** @return LengthAwarePaginator<int, Barang> */
     public function index(): LengthAwarePaginator
     {
         return Barang::with('kategori')
@@ -19,6 +20,7 @@ class BarangService
         return Barang::with('kategori')->findOrFail($id);
     }
 
+    /** @param array<string, mixed> $data */
     public function store(array $data): Barang
     {
         if (isset($data['Stok'])) {
@@ -30,6 +32,7 @@ class BarangService
         return $barang->load('kategori');
     }
 
+    /** @param array<string, mixed> $data */
     public function update(string|int $id, array $data): Barang
     {
         $barang = Barang::findOrFail($id);

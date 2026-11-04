@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DashboardResource;
 use App\Services\DashboardService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
@@ -14,7 +15,7 @@ class DashboardController extends Controller
         protected DashboardService $dashboardService
     ) {}
 
-    public function index()
+    public function index(): JsonResponse
     {
         $validated = request()->validate([
             'rentang' => ['sometimes', 'string', 'in:1h,7h,30h'],

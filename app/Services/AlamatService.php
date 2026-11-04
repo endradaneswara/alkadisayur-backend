@@ -7,6 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class AlamatService
 {
+    /** @return LengthAwarePaginator<int, Alamat> */
     public function index(string|int $userId): LengthAwarePaginator
     {
         return Alamat::where('user_id', $userId)
@@ -22,6 +23,7 @@ class AlamatService
             ->findOrFail($id);
     }
 
+    /** @param array<string, mixed> $data */
     public function store(
         string|int $userId,
         array $data
@@ -35,6 +37,7 @@ class AlamatService
         ]);
     }
 
+    /** @param array<string, mixed> $data */
     public function update(
         string|int $userId,
         string|int $id,

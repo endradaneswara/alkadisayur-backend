@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\BarangFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read Kategori|null $kategori
+ */
 class Barang extends Model
 {
+    /** @use HasFactory<BarangFactory> */
     use HasFactory;
 
     protected $table = 'barang';
@@ -39,6 +44,7 @@ class Barang extends Model
         ];
     }
 
+    /** @return BelongsTo<Kategori, $this> */
     public function kategori(): BelongsTo
     {
         return $this->belongsTo(Kategori::class, 'kategori_id');

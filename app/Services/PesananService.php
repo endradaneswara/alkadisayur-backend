@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class PesananService
 {
+    /** @return LengthAwarePaginator<int, Pesanan> */
     public function index(string|int $userId): LengthAwarePaginator
     {
         return Pesanan::with([
@@ -40,6 +41,7 @@ class PesananService
             ->findOrFail($id);
     }
 
+    /** @param array<string, mixed> $data */
     public function store(
         string|int $userId,
         array $data
@@ -79,6 +81,7 @@ class PesananService
                 ]);
             }
 
+            /** @var Lokasi $lokasi */
             $lokasi = Lokasi::findOrFail(
                 $data['lokasi_toko_id']
             );
@@ -113,7 +116,7 @@ class PesananService
             );
 
             $biayaPengiriman = $data['metode'] === 'pesan_antar'
-                ? $lokasi->biaya_pengiriman
+                ? $lokasi->getAttribute('biaya_pengiriman')
                 : 0;
 
             $pesanan = Pesanan::create([
@@ -209,6 +212,10 @@ class PesananService
         });
     }
 
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return LengthAwarePaginator<int, Pesanan>
+     */
     public function adminIndex(User $user, array $filters = []): LengthAwarePaginator
     {
         $query = Pesanan::with([
@@ -271,6 +278,7 @@ class PesananService
         return $query->findOrFail($id);
     }
 
+    /** @param array<string, mixed> $data */
     public function updateStatus(
         User $user,
         string|int $id,

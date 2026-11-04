@@ -11,6 +11,7 @@ class UpdateKategoriRequest extends FormRequest
         return $this->user()?->role === 'superAdmin';
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         $kategoriId = $this->route('kategori');

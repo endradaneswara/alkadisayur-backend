@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class PembayaranService
 {
+    /** @return LengthAwarePaginator<int, Pembayaran> */
     public function index(string|int $userId): LengthAwarePaginator
     {
         return Pembayaran::with('pesanan')
@@ -32,10 +33,12 @@ class PembayaranService
             ->findOrFail($id);
     }
 
+    /** @param array<string, mixed> $data */
     public function store(
         string|int $userId,
         array $data
     ): Pembayaran {
+        /** @var Pesanan $pesanan */
         $pesanan = Pesanan::where('user_id', $userId)
             ->findOrFail($data['pesanan_id']);
 
@@ -70,6 +73,7 @@ class PembayaranService
         return $pembayaran->load('pesanan');
     }
 
+    /** @param array<string, mixed> $data */
     public function update(
         User $user,
         string|int $id,

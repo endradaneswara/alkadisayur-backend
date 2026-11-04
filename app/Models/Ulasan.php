@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\UlasanFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read User|null $user
+ */
 class Ulasan extends Model
 {
+    /** @use HasFactory<UlasanFactory> */
     use HasFactory;
 
     protected $table = 'ulasan';
@@ -24,6 +29,7 @@ class Ulasan extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

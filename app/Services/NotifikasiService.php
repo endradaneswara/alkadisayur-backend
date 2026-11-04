@@ -7,6 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotifikasiService
 {
+    /** @return LengthAwarePaginator<int, Notifikasi> */
     public function index(string|int $userId): LengthAwarePaginator
     {
         return Notifikasi::with('pesanan')

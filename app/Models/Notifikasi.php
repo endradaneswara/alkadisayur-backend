@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\NotifikasiFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read Pesanan|null $pesanan
+ */
 class Notifikasi extends Model
 {
+    /** @use HasFactory<NotifikasiFactory> */
     use HasFactory;
 
     protected $table = 'notifikasi';
@@ -26,11 +31,13 @@ class Notifikasi extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<Pesanan, $this> */
     public function pesanan(): BelongsTo
     {
         return $this->belongsTo(Pesanan::class);

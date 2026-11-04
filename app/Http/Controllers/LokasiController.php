@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateLokasiRequest;
 use App\Http\Resources\LokasiResource;
 use App\Services\LokasiService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 
 class LokasiController extends Controller
 {
@@ -16,7 +17,7 @@ class LokasiController extends Controller
         protected LokasiService $lokasiService
     ) {}
 
-    public function index()
+    public function index(): JsonResponse
     {
         $lokasi = $this->lokasiService->index();
 
@@ -26,7 +27,7 @@ class LokasiController extends Controller
         );
     }
 
-    public function store(StoreLokasiRequest $request)
+    public function store(StoreLokasiRequest $request): JsonResponse
     {
         $lokasi = $this->lokasiService->store(
             $request->validated()
@@ -39,7 +40,7 @@ class LokasiController extends Controller
         );
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $lokasi = $this->lokasiService->show($id);
 
@@ -52,7 +53,7 @@ class LokasiController extends Controller
     public function update(
         UpdateLokasiRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $lokasi = $this->lokasiService->update(
             $id,
             $request->validated()
@@ -67,7 +68,7 @@ class LokasiController extends Controller
     public function updateBiayaPengiriman(
         UpdateLokasiRequest $request,
         string $id
-    ) {
+    ): JsonResponse {
         $lokasi = $this->lokasiService->update(
             $id,
             $request->validated()
@@ -79,7 +80,7 @@ class LokasiController extends Controller
         );
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $this->lokasiService->destroy($id);
 

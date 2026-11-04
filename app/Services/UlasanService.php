@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 
 class UlasanService
 {
+    /** @return LengthAwarePaginator<int, Ulasan> */
     public function index(
         ?int $perPage = 20,
         ?int $rating = null,
@@ -31,6 +32,7 @@ class UlasanService
             ->findOrFail($id);
     }
 
+    /** @param array<string, mixed> $data */
     public function store(string|int $userId, array $data): Ulasan
     {
         $sudahAda = Ulasan::where('user_id', $userId)->exists();
@@ -48,6 +50,7 @@ class UlasanService
         ])->load('user');
     }
 
+    /** @param array<string, mixed> $data */
     public function update(
         string|int $userId,
         string|int $id,

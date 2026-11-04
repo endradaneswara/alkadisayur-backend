@@ -7,6 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class LokasiService
 {
+    /** @return LengthAwarePaginator<int, Lokasi> */
     public function index(): LengthAwarePaginator
     {
         return Lokasi::query()
@@ -19,11 +20,13 @@ class LokasiService
         return Lokasi::findOrFail($id);
     }
 
+    /** @param array<string, mixed> $data */
     public function store(array $data): Lokasi
     {
         return Lokasi::create($data);
     }
 
+    /** @param array<string, mixed> $data */
     public function update(string|int $id, array $data): Lokasi
     {
         $lokasi = Lokasi::findOrFail($id);

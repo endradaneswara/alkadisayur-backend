@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lokasi extends Model
 {
+    /** @use HasFactory<Factory> */
     use HasFactory, SoftDeletes;
 
     protected $table = 'lokasi';
@@ -30,11 +32,13 @@ class Lokasi extends Model
         ];
     }
 
+    /** @return HasMany<Pesanan, $this> */
     public function pesanan(): HasMany
     {
         return $this->hasMany(Pesanan::class, 'lokasi_toko_id');
     }
 
+    /** @return HasMany<User, $this> */
     public function admin(): HasMany
     {
         return $this->hasMany(User::class, 'lokasi_id');
