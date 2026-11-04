@@ -70,8 +70,8 @@ jobs:
       - name: Check TypeScript
         run: npm run types:check
 
-      - name: Run Pest tests
-        run: php artisan test
-
       - name: Build assets
         run: npm run build
+
+      - name: Run Pest tests
+        run: php artisan test

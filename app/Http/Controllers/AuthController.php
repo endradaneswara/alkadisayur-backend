@@ -53,22 +53,14 @@ class AuthController extends Controller
 
     public function redirectGoogle(): RedirectResponse
     {
-        $provider = Socialite::driver('google');
-
-        if (method_exists($provider, 'stateless')) {
-            $provider = $provider->stateless();
-        }
+        $provider = Socialite::driver('google')->stateless();
 
         return $provider->redirect();
     }
 
     public function callbackGoogle(Request $request): RedirectResponse
     {
-        $provider = Socialite::driver('google');
-
-        if (method_exists($provider, 'stateless')) {
-            $provider = $provider->stateless();
-        }
+        $provider = Socialite::driver('google')->stateless();
 
         $googleUser = $provider->user();
 
@@ -132,7 +124,9 @@ class AuthController extends Controller
     {
         $accessToken = $request->user()->currentAccessToken();
 
-        $accessToken->delete();
+        if ($accessToken && method_exists($accessToken, 'delete')) {
+            $accessToken->delete();
+        }
 
         if ($request->hasSession()) {
             Auth::guard('web')->logout();

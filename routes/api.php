@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register'])
     ->middleware('throttle:5,1');
 
-Route::post('/login', [AuthController::class, 'login'])->name('login')
+Route::post('/login', [AuthController::class, 'login'])->name('api.login')
     ->middleware('throttle:5,1');
 
 Route::post('/forgot-password', [PasswordController::class, 'forgot'])
@@ -38,15 +38,20 @@ Route::get('/kategori/{id}', [KategoriController::class, 'show'])
 Route::get('/kategori/{id}/barang', [KategoriController::class, 'barang'])
     ->whereNumber('id');
 
-Route::get('/barang', [BarangController::class, 'index']);
-Route::get('/barang/{id}', [BarangController::class, 'show'])
-    ->whereNumber('id');
 
 Route::get('/lokasi', [LokasiController::class, 'index']);
 Route::get('/lokasi/{id}', [LokasiController::class, 'show'])
     ->whereNumber('id');
 
+Route::get('/barang', [BarangController::class, 'index']);
+Route::get('/barang/{id}', [BarangController::class, 'show'])
+    ->whereNumber('id');
+
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/barang', [BarangController::class, 'index']);
+    Route::get('/barang/{id}', [BarangController::class, 'show'])
+        ->whereNumber('id');
+
     Route::post('/logout', [AuthController::class, 'logout'])
         ->middleware('throttle:10,1');
 
@@ -87,9 +92,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/notifikasi/{id}', [NotifikasiController::class, 'destroy'])
             ->whereNumber('id');
     });
-
     Route::middleware('role:admin|superAdmin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
+    });
+
+    Route::middleware('role:admin|superAdmin')->group(function () {
 
         Route::get('/admin/pesanan', [PesananController::class, 'adminIndex']);
         Route::get('/admin/pesanan/{id}', [PesananController::class, 'adminShow'])
