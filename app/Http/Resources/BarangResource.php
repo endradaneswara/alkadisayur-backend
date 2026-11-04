@@ -12,7 +12,7 @@ class BarangResource extends JsonResource
         return [
             'id' => $this->id,
             'kategori_id' => $this->kategori_id,
-            'nama_kategori' => $this->whenLoaded('kategori', fn() => $this->kategori?->nama_kategori),
+            'nama_kategori' => $this->whenLoaded('kategori', fn () => $this->kategori?->nama_kategori),
             'KodeItem' => $this->KodeItem,
             'Barcode' => $this->Barcode,
             'SKU' => $this->SKU,

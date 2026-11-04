@@ -22,8 +22,7 @@ class PenjualanResource extends JsonResource
             'metode' => $this->metode,
             'total_harga' => $this->total_harga,
             'biaya_pengiriman' => $this->biaya_pengiriman,
-            'total_pendapatan' =>
-                (float) $this->total_harga +
+            'total_pendapatan' => (float) $this->total_harga +
                 (float) $this->biaya_pengiriman,
             'tanggal_pemesanan' => $this->tanggal_pemesanan,
             'items' => PesananItemResource::collection(
