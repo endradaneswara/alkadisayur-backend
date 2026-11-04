@@ -55,6 +55,9 @@ jobs:
           touch database/database.sqlite
           php artisan key:generate
 
+      - name: Generate Wayfinder TypeScript
+        run: php artisan wayfinder:generate --with-form
+
       - name: Check code style
         run: composer lint:check
 
