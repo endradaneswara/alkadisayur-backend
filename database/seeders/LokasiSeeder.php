@@ -14,17 +14,17 @@ class LokasiSeeder extends Seeder
     public function run(): void
     {
         Lokasi::create([
-        'nama' => 'AlkadiSayur Sokka',
+        'nama' => 'Alkadi Sokka',
         'latitude' => -7.678,
         'longitude' => 109.653,
-        'deskripsi' => 'Toko AlkadiSayur cabang Kebumen.',
+        'deskripsi' => 'Alkadi Fresh Market cabang Sokka Kebumen.',
     ]);
 
         Lokasi::create([
-        'nama' => 'AlkadiSayur Pemuda',
+        'nama' => 'Alkadi Pemuda',
         'latitude' => -7.607,
         'longitude' => 109.514,
-        'deskripsi' => 'Toko AlkadiSayur cabang Gombong.',
+        'deskripsi' => 'Alkadi Fresh Market cabang Pemuda Kebumen.',
     ]);
     }
 }

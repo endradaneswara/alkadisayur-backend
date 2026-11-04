@@ -2,15 +2,28 @@ name: Backend CI
 
 on:
   pull_request:
+    branches:
+      - develop
+      - main
   push:
-    branches: [main]
+    branches:
+      - develop
+      - main
 
 permissions:
   contents: read
 
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality-check:
     runs-on: ubuntu-latest
+
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
 
     steps:
       - name: Checkout repository
@@ -19,41 +32,42 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           tools: composer:v2
+          extensions: gd, zip, pdo_sqlite, pdo_mysql
           coverage: none
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: "22"
           cache: npm
 
       - name: Install PHP dependencies
-        run: composer install --no-progress --prefer-dist --no-interaction
+        run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Install JS dependencies
+      - name: Install JavaScript dependencies
         run: npm ci
 
       - name: Prepare environment
         run: |
           cp .env.example .env
-          php artisan key:generate
           touch database/database.sqlite
+          php artisan key:generate
 
-      - name: Check code style (Pint)
+      - name: Check code style
         run: composer lint:check
 
-      - name: Check PHP types (PHPStan)
+      - name: Check PHP types
         run: composer types:check
 
-      - name: Check JS (ESLint)
+      - name: Check JavaScript
         run: npm run check
 
-      - name: Check TS types
+      - name: Check TypeScript
         run: npm run types:check
 
-      - name: Run tests (Pest)
+      - name: Run Pest tests
         run: php artisan test
 
       - name: Build assets
