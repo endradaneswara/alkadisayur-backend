@@ -9,11 +9,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\AbstractProvider;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -63,66 +66,87 @@ class AuthController extends Controller
 
     public function callbackGoogle(Request $request): RedirectResponse
     {
-        /** @var AbstractProvider $provider */
-        $provider = Socialite::driver('google');
-        $provider->stateless();
+        try {
+            /** @var AbstractProvider $provider */
+            $provider = Socialite::driver('google');
+            $provider->stateless();
 
-        $googleUser = $provider->user();
+            $googleUser = $provider->user();
+            $email = $googleUser->getEmail();
+            $googleId = $googleUser->getId();
+            $emailVerified = filter_var(
+                $googleUser->user['email_verified'] ?? false,
+                FILTER_VALIDATE_BOOLEAN,
+            );
 
-        if (! $googleUser->getEmail()) {
-            throw ValidationException::withMessages([
-                'email' => ['Email Google tidak tersedia.'],
-            ]);
+            if (! $email || ! $googleId) {
+                throw ValidationException::withMessages([
+                    'email' => ['Email Google tidak tersedia.'],
+                ]);
+            }
+
+            if (! $emailVerified) {
+                throw ValidationException::withMessages([
+                    'email' => ['Email Google belum terverifikasi.'],
+                ]);
+            }
+
+            $user = DB::transaction(function () use ($googleUser, $email, $googleId): User {
+                $byGoogleId = User::where('google_id', $googleId)->lockForUpdate()->first();
+                $byEmail = User::where('email', $email)->lockForUpdate()->first();
+
+                if ($byGoogleId && $byEmail && $byGoogleId->isNot($byEmail)) {
+                    throw new \RuntimeException('Google identity conflict.');
+                }
+
+                $user = $byGoogleId ?? $byEmail;
+
+                if (! $user) {
+                    $user = User::create([
+                        'name' => $googleUser->getName() ?: $email,
+                        'email' => $email,
+                        'password' => Str::random(64),
+                        'google_id' => $googleId,
+                        'avatar' => $googleUser->getAvatar(),
+                        'role' => 'customer',
+                    ]);
+                    $user->forceFill(['email_verified_at' => now()])->save();
+
+                    return $user;
+                }
+
+                // Google login must not overwrite an existing profile or role.
+                $user->forceFill([
+                    'google_id' => $user->google_id ?: $googleId,
+                    'email_verified_at' => $user->email_verified_at ?: now(),
+                ])->save();
+
+                return $user;
+            });
+
+            Auth::guard('web')->login($user);
+            $request->session()->regenerate();
+
+            return redirect()->away($this->frontendCallbackUrl('success'));
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            Log::warning('Google authentication failed.', ['exception' => $exception]);
+
+            return $this->googleFailureRedirect();
         }
+    }
 
-        if (! ($googleUser->user['email_verified'] ?? false)) {
-            throw ValidationException::withMessages([
-                'email' => ['Email Google belum terverifikasi.'],
-            ]);
-        }
+    private function frontendCallbackUrl(string $status): string
+    {
+        return rtrim((string) config('services.frontend_url'), '/')
+            .'/store/akun/google/callback?status='
+            .$status;
+    }
 
-        $user = User::where(
-            'google_id',
-            $googleUser->getId()
-        )->first();
-
-        if (! $user) {
-            $user = User::where(
-                'email',
-                $googleUser->getEmail()
-            )->first();
-        }
-
-        if ($user) {
-            $user->update([
-                'google_id' => $googleUser->getId(),
-                'name' => $googleUser->getName(),
-                'avatar' => $googleUser->getAvatar(),
-            ]);
-        } else {
-            $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
-                'password' => Str::random(32),
-                'google_id' => $googleUser->getId(),
-                'avatar' => $googleUser->getAvatar(),
-                'role' => 'customer',
-            ]);
-        }
-
-        if ($googleUser->user['email_verified'] ?? false) {
-            $user->forceFill(['email_verified_at' => now()])->save();
-        }
-
-        Auth::guard('web')->login($user);
-        $request->session()->regenerate();
-
-        $frontendCallback = rtrim(
-            (string) config('services.frontend_url'),
-            '/'
-        ).'/store/akun/google/callback';
-
-        return redirect()->away($frontendCallback.'?status=success');
+    private function googleFailureRedirect(): RedirectResponse
+    {
+        return redirect()->away($this->frontendCallbackUrl('error'));
     }
 
     public function logout(Request $request): JsonResponse
