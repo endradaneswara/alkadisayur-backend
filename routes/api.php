@@ -38,7 +38,6 @@ Route::get('/kategori/{id}', [KategoriController::class, 'show'])
 Route::get('/kategori/{id}/barang', [KategoriController::class, 'barang'])
     ->whereNumber('id');
 
-
 Route::get('/lokasi', [LokasiController::class, 'index']);
 Route::get('/lokasi/{id}', [LokasiController::class, 'show'])
     ->whereNumber('id');
