@@ -5,9 +5,10 @@ use App\Models\Kategori;
 use App\Models\Lokasi;
 use App\Models\User;
 
-test('protected api endpoints reject guests', function () {
+test('public catalog and protected api endpoints', function () {
+    $this->getJson('/api/barang')->assertOk();
+
     $this->getJson('/api/profile')->assertUnauthorized();
-    $this->getJson('/api/barang')->assertUnauthorized();
     $this->getJson('/api/pesanan')->assertUnauthorized();
 });
 
@@ -22,14 +23,14 @@ test('customer cannot access admin or super admin endpoints', function () {
     $this->getJson('/api/data/export')->assertForbidden();
 });
 
-test('admin can access admin routes but cannot access super admin routes', function () {
+test('admin can access admin routes and dashboard but not super admin routes', function () {
     $admin = User::factory()->create(['role' => 'admin']);
 
     $this->actingAs($admin, 'sanctum')
         ->getJson('/api/admin/notifikasi')
         ->assertOk();
 
-    $this->getJson('/api/dashboard')->assertForbidden();
+    $this->getJson('/api/dashboard')->assertOk();
     $this->getJson('/api/users')->assertForbidden();
 });
 

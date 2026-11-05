@@ -127,7 +127,9 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        optional($request->user()->currentAccessToken())->delete();
+        if ($request->bearerToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
 
         if ($request->hasSession()) {
             Auth::guard('web')->logout();
