@@ -45,11 +45,7 @@ Route::get('/lokasi/{id}', [LokasiController::class, 'show'])
 Route::get('/barang', [BarangController::class, 'index']);
 Route::get('/barang/{id}', [BarangController::class, 'show'])
     ->whereNumber('id');
-
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/barang', [BarangController::class, 'index']);
-    Route::get('/barang/{id}', [BarangController::class, 'show'])
-        ->whereNumber('id');
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->middleware('throttle:10,1');

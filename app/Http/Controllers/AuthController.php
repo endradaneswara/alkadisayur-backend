@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
 
 class AuthController extends Controller
 {
@@ -53,14 +54,18 @@ class AuthController extends Controller
 
     public function redirectGoogle(): RedirectResponse
     {
-        $provider = Socialite::driver('google')->stateless();
+        /** @var AbstractProvider $provider */
+        $provider = Socialite::driver('google');
+        $provider->stateless();
 
         return $provider->redirect();
     }
 
     public function callbackGoogle(Request $request): RedirectResponse
     {
-        $provider = Socialite::driver('google')->stateless();
+        /** @var AbstractProvider $provider */
+        $provider = Socialite::driver('google');
+        $provider->stateless();
 
         $googleUser = $provider->user();
 
@@ -122,10 +127,8 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $accessToken = $request->user()->currentAccessToken();
-
-        if ($accessToken && method_exists($accessToken, 'delete')) {
-            $accessToken->delete();
+        if ($request->bearerToken()) {
+            $request->user()->currentAccessToken()->delete();
         }
 
         if ($request->hasSession()) {
