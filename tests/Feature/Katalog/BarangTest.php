@@ -130,6 +130,6 @@ test('the API accepts cross-origin requests from the local frontend', function (
         'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'authorization,content-type',
     ])
         ->assertNoContent()
-        ->assertHeader('Access-Control-Allow-Origin', '*')
+        ->assertHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
         ->assertHeader('Access-Control-Allow-Methods', 'GET');
 });
