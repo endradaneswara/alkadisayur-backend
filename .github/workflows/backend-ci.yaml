@@ -9,6 +9,8 @@ on:
     branches:
       - develop
       - main
+      - feature/login
+      - feature/produk
 
 permissions:
   contents: read
