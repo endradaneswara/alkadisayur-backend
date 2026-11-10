@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LupaPasswordRequest;
 use App\Http\Requests\ResetPasswordRequest;
+use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\VerifyResetOtpRequest;
 use App\Services\PasswordService;
 use App\Traits\ApiResponse;
