@@ -18,7 +18,9 @@ class BarangController extends Controller
 
     public function index(): JsonResponse
     {
-        $barang = $this->barangService->index();
+        $barang = $this->barangService->index(
+            request()->string('search')->toString()
+        );
         $user = request()->user();
 
         if ($user === null || $user->role === 'customer') {

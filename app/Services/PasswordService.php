@@ -46,6 +46,27 @@ class PasswordService
         }
     }
 
+    public function verifyResetOtp(string $email, string $otp): void
+    {
+        $resetOtp = DB::table('password_reset_tokens')
+            ->where('email', $email)
+            ->first();
+        $createdAt = $resetOtp?->created_at === null
+            ? null
+            : Carbon::parse($resetOtp->created_at);
+        $isOtpValid = $createdAt !== null
+            && $createdAt->greaterThan(now()->subMinutes(self::OTP_EXPIRY_MINUTES))
+            && $createdAt->lessThanOrEqualTo(now())
+            && Hash::check($otp, $resetOtp->token);
+
+        if (! $isOtpValid || ! User::where('email', $email)->exists()) {
+            throw ValidationException::withMessages([
+                'otp' => ['Kode OTP tidak valid atau sudah kedaluwarsa.'],
+            ]);
+        }
+    }
+
+
     /** @param array<string, mixed> $data */
     public function resetPassword(array $data): void
     {
