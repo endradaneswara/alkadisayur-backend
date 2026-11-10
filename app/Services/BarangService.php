@@ -18,8 +18,8 @@ class BarangService
                 ->paginate(20);
         }
 
-        $pattern = '%' . $term . '%';
-        $prefix = $term . '%';
+        $pattern = '%'.$term.'%';
+        $prefix = $term.'%';
 
         return Barang::with('kategori')
             ->where(function ($query) use ($pattern): void {
@@ -27,8 +27,7 @@ class BarangService
                     ->where('NamaItem', 'like', $pattern)
                     ->orWhere('Merek', 'like', $pattern)
                     ->orWhere('Keterangan', 'like', $pattern)
-                    ->orWhereHas('kategori', fn ($kategori) =>
-                        $kategori->where('nama_kategori', 'like', $pattern)
+                    ->orWhereHas('kategori', fn ($kategori) => $kategori->where('nama_kategori', 'like', $pattern)
                     );
             })
             ->orderByRaw(
