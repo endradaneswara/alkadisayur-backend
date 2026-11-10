@@ -22,7 +22,7 @@ class KeranjangResource extends JsonResource
             ),
             'total_item' => $this->whenLoaded(
                 'items',
-                fn () => $this->items->sum('jumlah')
+                fn () => $this->items->count()
             ),
             'total_harga' => $this->whenLoaded(
                 'items',

@@ -8,9 +8,43 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class BarangService
 {
     /** @return LengthAwarePaginator<int, Barang> */
-    public function index(): LengthAwarePaginator
+    public function index(?string $search = null): LengthAwarePaginator
     {
+        $term = $search === null ? '' : trim($search);
+
+        if ($term === '') {
+            return Barang::with('kategori')
+                ->orderBy('id')
+                ->paginate(20);
+        }
+
+        $pattern = '%'.$term.'%';
+        $prefix = $term.'%';
+
         return Barang::with('kategori')
+            ->where(function ($query) use ($pattern): void {
+                $query
+                    ->where('NamaItem', 'like', $pattern)
+                    ->orWhere('Merek', 'like', $pattern)
+                    ->orWhere('Keterangan', 'like', $pattern)
+                    ->orWhereHas('kategori', fn ($kategori) => $kategori->where('nama_kategori', 'like', $pattern)
+                    );
+            })
+            ->orderByRaw(
+                'CASE
+                    WHEN LOWER(NamaItem) = LOWER(?) THEN 0
+                    WHEN LOWER(NamaItem) LIKE LOWER(?) THEN 1
+                    WHEN LOWER(NamaItem) LIKE LOWER(?) THEN 2
+                    WHEN EXISTS (
+                        SELECT 1 FROM kategori
+                        WHERE kategori.id = barang.kategori_id
+                        AND LOWER(kategori.nama_kategori) LIKE LOWER(?)
+                    ) THEN 3
+                    ELSE 4
+                END',
+                [$term, $prefix, $pattern, $prefix]
+            )
+            ->orderBy('NamaItem')
             ->orderBy('id')
             ->paginate(20);
     }

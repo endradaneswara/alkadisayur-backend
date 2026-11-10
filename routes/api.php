@@ -26,6 +26,8 @@ Route::post('/login', [AuthController::class, 'login'])->name('api.login')
 
 Route::post('/forgot-password', [PasswordController::class, 'forgot'])
     ->middleware('throttle:5,1');
+Route::post('/verify-reset-otp', [PasswordController::class, 'verifyOtp'])
+    ->middleware('throttle:5,1');
 
 Route::post('/reset-password', [PasswordController::class, 'reset'])
     ->middleware('throttle:5,1');
